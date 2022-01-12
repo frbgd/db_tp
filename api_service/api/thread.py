@@ -85,7 +85,7 @@ async def get_thread_posts(
     # TODO валидация sort
     thread = None
     if slug_or_id.isdigit():
-        thread = await thread_service.get_by_id(slug_or_id)
+        thread = await thread_service.get_by_id(int(slug_or_id))
 
     if not thread:
         thread = await thread_service.get_by_slug(slug_or_id)
@@ -109,11 +109,11 @@ async def vote_for_thread(
     # TODO валидация (-1, 1)
     if slug_or_id.isdigit():
         try:
-            await thread_service.vote_by_id(slug_or_id, item)
+            await thread_service.vote_by_id(int(slug_or_id), item)
         except foreign_key_violation_exception:
             pass
         else:
-            thread = await thread_service.get_by_id(slug_or_id)
+            thread = await thread_service.get_by_id(int(slug_or_id))
             return thread
 
     thread = await thread_service.get_by_slug(slug_or_id)
