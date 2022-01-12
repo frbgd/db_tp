@@ -8,8 +8,6 @@ RUN apt-get update && apt-get install -y python3.9 python3.9-dev python3-distuti
 
 ENV PGVER 12
 
-COPY ./db /db
-
 RUN apt -y update && \
     apt install -y wget gnupg && \
     wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
@@ -19,6 +17,8 @@ RUN apt -y update && \
 RUN apt -y update && apt install -y \
         postgresql-$PGVER \
     && rm -rf /var/lib/apt/lists/*
+
+COPY ./db /db
 
 USER postgres
 RUN service postgresql start && \
