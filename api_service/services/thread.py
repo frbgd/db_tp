@@ -209,12 +209,12 @@ class ThreadService:
         self.db = db
 
     async def get_by_slug_or_id(self, slug_or_id: str) -> Optional[Thread]:
-        thread = await self.get_by_slug(slug_or_id)
+        thread = None
+        if slug_or_id.isdigit():
+            thread = await self.get_by_id(slug_or_id)
         if thread:
             return thread
-        if slug_or_id.isdigit():
-            thread = await self.get_by_id(int(slug_or_id))
-        return thread
+        return await self.get_by_slug(slug_or_id)
 
     async def get_by_slug(self, slug: str) -> Optional[Thread]:
         value = await self.db.get_one(
@@ -245,7 +245,7 @@ class ThreadService:
             votes=value['votes']
         )
 
-    async def get_by_id(self, id_: int) -> Optional[Thread]:
+    async def get_by_id(self, id_: str) -> Optional[Thread]:
         value = await self.db.get_one(
             """SELECT id,
                    slug,
@@ -304,12 +304,12 @@ class ThreadService:
         return result_posts, False
 
     async def update_by_slug_or_id(self, slug_or_id: str, item: ThreadUpdate) -> Optional[Thread]:
-        thread = await self.update_by_slug(slug_or_id, item)
+        thread = None
+        if slug_or_id.isdigit():
+            thread = await self.update_by_id(slug_or_id, item)
         if thread:
             return thread
-        if slug_or_id.isdigit():
-            thread = await self.update_by_id(int(slug_or_id), item)
-        return thread
+        return await self.update_by_slug(slug_or_id, item)
 
     async def update_by_slug(self, slug: str, item: ThreadUpdate) -> Optional[Thread]:
         thread_title = item.title if item.title else None
@@ -337,7 +337,7 @@ class ThreadService:
             votes=value['votes']
         )
 
-    async def update_by_id(self, id_: int, item: ThreadUpdate) -> Optional[Thread]:
+    async def update_by_id(self, id_: str, item: ThreadUpdate) -> Optional[Thread]:
         thread_title = item.title if item.title else None
         thread_message = item.message if item.message else None
 
@@ -363,7 +363,7 @@ class ThreadService:
             votes=value['votes']
         )
 
-    async def vote_by_id(self, id_: int, item: Vote):
+    async def vote_by_id(self, id_: str, item: Vote):
         # FIXME я хз, тут только так работает
         nickname = item.nickname
         voice = item.voice
