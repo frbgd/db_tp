@@ -33,7 +33,7 @@ class PostgressDbEngine:
         if not self._connection_pool:
             self._connection_pool = await asyncpg.create_pool(
                 min_size=1,
-                max_size=100,
+                max_size=1000,
                 command_timeout=60,
                 host=self.host,
                 port=self.port,
