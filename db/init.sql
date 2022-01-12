@@ -1,9 +1,3 @@
---
--- PostgreSQL database dump
---
-
-BEGIN;
-
 DROP SCHEMA IF EXISTS public CASCADE;
 CREATE SCHEMA public;
 
@@ -18,23 +12,9 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
---
--- Name: citext; Type: EXTENSION; Schema: -; Owner: -
---
-
 CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;
 
-
---
--- Name: EXTENSION citext; Type: COMMENT; Schema: -; Owner:
---
-
 COMMENT ON EXTENSION citext IS 'data type for case-insensitive character strings';
-
-
---
--- Name: add_new_forum_user(); Type: FUNCTION; Schema: public; Owner: postgres
---
 
 CREATE FUNCTION public.add_new_forum_user() RETURNS trigger
     LANGUAGE plpgsql
@@ -50,10 +30,6 @@ $$;
 
 
 ALTER FUNCTION public.add_new_forum_user() OWNER TO postgres;
-
---
--- Name: add_path_to_post(); Type: FUNCTION; Schema: public; Owner: postgres
---
 
 CREATE FUNCTION public.add_path_to_post() RETURNS trigger
     LANGUAGE plpgsql
@@ -85,10 +61,6 @@ $$;
 
 ALTER FUNCTION public.add_path_to_post() OWNER TO postgres;
 
---
--- Name: increment_forum_posts(); Type: FUNCTION; Schema: public; Owner: postgres
---
-
 CREATE FUNCTION public.increment_forum_posts() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -103,10 +75,6 @@ $$;
 
 
 ALTER FUNCTION public.increment_forum_posts() OWNER TO postgres;
-
---
--- Name: increment_forum_threads(); Type: FUNCTION; Schema: public; Owner: postgres
---
 
 CREATE FUNCTION public.increment_forum_threads() RETURNS trigger
     LANGUAGE plpgsql
@@ -123,10 +91,6 @@ $$;
 
 ALTER FUNCTION public.increment_forum_threads() OWNER TO postgres;
 
---
--- Name: insert_vote(); Type: FUNCTION; Schema: public; Owner: postgres
---
-
 CREATE FUNCTION public.insert_vote() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -141,10 +105,6 @@ $$;
 
 
 ALTER FUNCTION public.insert_vote() OWNER TO postgres;
-
---
--- Name: update_vote(); Type: FUNCTION; Schema: public; Owner: postgres
---
 
 CREATE FUNCTION public.update_vote() RETURNS trigger
     LANGUAGE plpgsql
@@ -165,10 +125,6 @@ SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
---
--- Name: forums; Type: TABLE; Schema: public; Owner: postgres
---
-
 CREATE UNLOGGED TABLE public.forums (
     slug public.citext NOT NULL,
     title text NOT NULL,
@@ -180,10 +136,6 @@ CREATE UNLOGGED TABLE public.forums (
 
 ALTER TABLE public.forums OWNER TO postgres;
 
---
--- Name: forums_users_nicknames; Type: TABLE; Schema: public; Owner: postgres
---
-
 CREATE UNLOGGED TABLE public.forums_users_nicknames (
     forum_slug public.citext NOT NULL,
     user_nickname public.citext NOT NULL COLLATE pg_catalog.ucs_basic
@@ -191,10 +143,6 @@ CREATE UNLOGGED TABLE public.forums_users_nicknames (
 
 
 ALTER TABLE public.forums_users_nicknames OWNER TO postgres;
-
---
--- Name: users; Type: TABLE; Schema: public; Owner: postgres
---
 
 CREATE UNLOGGED TABLE public.users (
     nickname public.citext NOT NULL COLLATE pg_catalog.ucs_basic,
@@ -205,10 +153,6 @@ CREATE UNLOGGED TABLE public.users (
 
 
 ALTER TABLE public.users OWNER TO postgres;
-
---
--- Name: forums_users; Type: VIEW; Schema: public; Owner: postgres
---
 
 CREATE VIEW public.forums_users AS
  SELECT fu_nicknames.forum_slug,
@@ -222,10 +166,6 @@ CREATE VIEW public.forums_users AS
 
 
 ALTER TABLE public.forums_users OWNER TO postgres;
-
---
--- Name: posts; Type: TABLE; Schema: public; Owner: postgres
---
 
 CREATE UNLOGGED TABLE public.posts (
     id bigint NOT NULL,
@@ -242,10 +182,6 @@ CREATE UNLOGGED TABLE public.posts (
 
 ALTER TABLE public.posts OWNER TO postgres;
 
---
--- Name: posts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
 CREATE SEQUENCE public.posts_id_seq
     START WITH 1
     INCREMENT BY 1
@@ -256,16 +192,7 @@ CREATE SEQUENCE public.posts_id_seq
 
 ALTER TABLE public.posts_id_seq OWNER TO postgres;
 
---
--- Name: posts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
 ALTER SEQUENCE public.posts_id_seq OWNED BY public.posts.id;
-
-
---
--- Name: threads; Type: TABLE; Schema: public; Owner: postgres
---
 
 CREATE UNLOGGED TABLE public.threads (
     id integer NOT NULL,
@@ -281,10 +208,6 @@ CREATE UNLOGGED TABLE public.threads (
 
 ALTER TABLE public.threads OWNER TO postgres;
 
---
--- Name: threads_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
 CREATE SEQUENCE public.threads_id_seq
     AS integer
     START WITH 1
@@ -296,16 +219,7 @@ CREATE SEQUENCE public.threads_id_seq
 
 ALTER TABLE public.threads_id_seq OWNER TO postgres;
 
---
--- Name: threads_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
 ALTER SEQUENCE public.threads_id_seq OWNED BY public.threads.id;
-
-
---
--- Name: votes; Type: TABLE; Schema: public; Owner: postgres
---
 
 CREATE UNLOGGED TABLE public.votes (
     thread_id integer NOT NULL,
@@ -316,63 +230,24 @@ CREATE UNLOGGED TABLE public.votes (
 
 ALTER TABLE public.votes OWNER TO postgres;
 
---
--- Name: posts id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.posts ALTER COLUMN id SET DEFAULT nextval('public.posts_id_seq'::regclass);
 
-
---
--- Name: threads id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.threads ALTER COLUMN id SET DEFAULT nextval('public.threads_id_seq'::regclass);
-
-
---
--- Name: forums forums_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
 
 ALTER TABLE ONLY public.forums
     ADD CONSTRAINT forums_pkey PRIMARY KEY (slug);
 
-
---
--- Name: forums_users_nicknames forums_users_nicknames_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.forums_users_nicknames
     ADD CONSTRAINT forums_users_nicknames_pk PRIMARY KEY (forum_slug, user_nickname);
-
-
---
--- Name: posts posts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
 
 ALTER TABLE ONLY public.posts
     ADD CONSTRAINT posts_pkey PRIMARY KEY (id);
 
-
---
--- Name: threads threads_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.threads
     ADD CONSTRAINT threads_pkey PRIMARY KEY (id);
 
-
---
--- Name: threads threads_slug_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.threads
     ADD CONSTRAINT threads_slug_key UNIQUE (slug);
-
-
---
--- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_email_key UNIQUE (email);
@@ -398,7 +273,50 @@ ALTER TABLE ONLY public.votes
 -- Name: posts_id_created_thread_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX posts_thread_created_id_idx ON public.posts USING btree (thread_id, created, id, created);
+CREATE INDEX posts_id_created_thread_id_idx ON public.posts USING btree (id, created, thread_id);
+
+
+--
+-- Name: posts_id_path_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX posts_id_path_idx ON public.posts USING btree (id, path);
+
+
+--
+-- Name: posts_parent_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX posts_parent_id_idx ON public.posts USING btree (parent, id);
+
+
+--
+-- Name: posts_thread_id_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX posts_thread_id_id_idx ON public.posts USING btree (thread_id, id);
+
+
+--
+-- Name: posts_thread_id_parent_path_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX posts_thread_id_parent_path_idx ON public.posts USING btree (thread_id, parent, path);
+
+
+--
+-- Name: posts_thread_id_path1_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX posts_thread_id_path1_id_idx ON public.posts USING btree (thread_id, (path[1]), id);
+
+
+--
+-- Name: posts_thread_id_path_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX posts_thread_id_path_idx ON public.posts USING btree (thread_id, path);
+
 
 --
 -- Name: threads_forum_slug_created_idx; Type: INDEX; Schema: public; Owner: postgres
@@ -546,5 +464,3 @@ ALTER TABLE ONLY public.votes
 --
 -- PostgreSQL database dump complete
 --
-
-COMMIT;
