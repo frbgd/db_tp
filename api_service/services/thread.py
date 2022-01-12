@@ -306,7 +306,7 @@ class ThreadService:
     async def update_by_slug_or_id(self, slug_or_id: str, item: ThreadUpdate) -> Optional[Thread]:
         thread = None
         if slug_or_id.isdigit():
-            thread = await self.update_by_id(slug_or_id, item)
+            thread = await self.update_by_id(int(slug_or_id), item)
         if thread:
             return thread
         return await self.update_by_slug(slug_or_id, item)
@@ -337,7 +337,7 @@ class ThreadService:
             votes=value['votes']
         )
 
-    async def update_by_id(self, id_: str, item: ThreadUpdate) -> Optional[Thread]:
+    async def update_by_id(self, id_: int, item: ThreadUpdate) -> Optional[Thread]:
         thread_title = item.title if item.title else None
         thread_message = item.message if item.message else None
 
