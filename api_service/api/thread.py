@@ -22,8 +22,11 @@ async def create_post(
 ) -> List[Post]:
     thread = await thread_service.get_by_slug_or_id(slug_or_id)
     if not thread:
-        await thread_service.db.close()  # FIXME говнокод
+        
         raise HttpNotFoundException()
+
+    if len(item) == 0:
+        return item
 
     now = datetime.now()
     for post in item:
@@ -33,7 +36,7 @@ async def create_post(
 
     posts, invalid_parents = await thread_service.create_posts(item)
 
-    await thread_service.db.close()  # FIXME говнокод
+    
     if invalid_parents:
         raise HttpConflictException()
     if not posts:
@@ -49,7 +52,7 @@ async def get_thread_details(
 ) -> Thread:
     thread = await thread_service.get_by_slug_or_id(slug_or_id)
 
-    await thread_service.db.close()  # FIXME говнокод
+    
     if not thread:
         raise HttpNotFoundException()
 
@@ -65,7 +68,7 @@ async def edit_thread(
     # TODO валидация
     thread = await thread_service.update_by_slug_or_id(slug_or_id, item)
 
-    await thread_service.db.close()  # FIXME говнокод
+    
     if not thread:
         raise HttpNotFoundException()
 
@@ -87,12 +90,12 @@ async def get_thread_posts(
     if not thread:
         thread = await thread_service.get_by_slug(slug_or_id)
     if not thread:
-        await thread_service.db.close()  # FIXME говнокод
+        
         raise HttpNotFoundException()
 
     posts = await thread_service.get_posts(thread.id, filter_params, sort)
 
-    await thread_service.db.close()  # FIXME говнокод
+    
     return posts
 
 
@@ -111,17 +114,18 @@ async def vote_for_thread(
             pass
         else:
             thread = await thread_service.get_by_id(int(slug_or_id))
-            await thread_service.db.close()  # FIXME говнокод
             return thread
 
     thread = await thread_service.get_by_slug(slug_or_id)
     if not thread:
-        await thread_service.db.close()  # FIXME говнокод
         raise HttpNotFoundException()
-    await thread_service.vote_by_id(thread.id, item)
+    try:
+        await thread_service.vote_by_id(thread.id, item)
+    except foreign_key_violation_exception:
+        raise HttpNotFoundException()
     thread = await thread_service.get_by_id(thread.id)
 
-    await thread_service.db.close()  # FIXME говнокод
+    
 
     if not thread:
         raise HttpNotFoundException()

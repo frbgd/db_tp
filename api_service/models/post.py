@@ -14,17 +14,17 @@ class Post(BaseModel):
     created: datetime = None
     author: str
     forum: str = ''
-    is_edited: bool = False
+    isEdited: bool = False
     parent: Optional[int] = None
     thread: int = 0
 
 
 class FullPost(BaseModel):
     post: Post
-    author: User
-    thread: Thread
-    forum: Forum
+    author: User = None
+    thread: Thread = None
+    forum: Forum = None
 
 
 class PostUpdate(BaseModel):
-    message: str
+    message: str = ''

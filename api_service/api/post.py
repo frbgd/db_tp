@@ -10,6 +10,7 @@ router = APIRouter()
 @router.get('/{id}/details')
 async def get_post_details(
         id: int,
+        related: str = None,
         post_service: PostService = Depends(get_post_service)
 ) -> FullPost:
     # TODO related поле
@@ -20,7 +21,17 @@ async def get_post_details(
     if not post:
         raise HttpNotFoundException()
 
-    return post
+    result = FullPost(
+        post=post.post
+    )
+    if related:
+        if 'user' in related:
+            result.author = post.author
+        if 'forum' in related:
+            result.forum = post.forum
+        if 'thread' in related:
+            result.thread = post.thread
+    return result
 
 
 @router.post('/{id}/details')

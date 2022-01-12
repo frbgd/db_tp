@@ -32,12 +32,15 @@ RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PGVER/main/pg_hba
 USER root
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
-EXPOSE 5432
-EXPOSE 5000
+COPY ./api_service/requirements.txt /app/requirements.txt
+
+RUN python3 -m pip install --upgrade pip && pip3 install --upgrade setuptools && pip3 install -r /app/requirements.txt
 
 COPY ./api_service /app
 
 WORKDIR /app
 
-RUN python3 -m pip install --upgrade pip && pip3 install --upgrade setuptools && pip3 install -r requirements.txt
+EXPOSE 5432
+EXPOSE 5000
+
 CMD service postgresql start && gunicorn main:app --workers 8 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:5000

@@ -295,7 +295,7 @@ class ThreadService:
                     thread=value['thread_id'],
                     author=value['author_nickname'],
                     forum=value['forum_slug'],
-                    is_edited=value['is_edited'],
+                    isEdited=value['is_edited'],
                     message=value['message'],
                     parent=value['parent'],
                     created=value['created']
@@ -399,7 +399,7 @@ class ThreadService:
                 thread=value['thread_id'],
                 author=value['author_nickname'],
                 forum=value['forum_slug'],
-                is_edited=value['is_edited'],
+                isEdited=value['is_edited'],
                 message=value['message'],
                 parent=value['parent'],
                 created=value['created']

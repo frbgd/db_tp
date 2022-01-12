@@ -112,7 +112,7 @@ class PostService:
                 created=value['created'],
                 author=value['author_nickname'],
                 forum=value['forum_slug'],
-                is_edited=value['is_edited'],
+                isEdited=value['is_edited'],
                 parent=value['parent'],
                 thread=value['thread_id']
             ),
@@ -149,7 +149,7 @@ class PostService:
             created=value['created'],
             author=value['author_nickname'],
             forum=value['forum_slug'],
-            is_edited=value['is_edited'],
+            isEdited=value['is_edited'],
             parent=value['parent'],
             thread=value['thread_id']
         )

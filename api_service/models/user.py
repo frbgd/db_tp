@@ -9,6 +9,6 @@ class User(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    email: str
-    fullname: str
-    about: str
+    email: str = ''
+    fullname: str = ''
+    about: str = ''

@@ -221,7 +221,7 @@ class ForumService:
 
     async def create_forum(self, item: Forum) -> Tuple[Optional[Forum], bool]:
         try:
-            await self.db.insert(
+            value = await self.db.insert(
                 """INSERT INTO forums (slug, title, threads, posts, owner_nickname)
                     VALUES ($1, $2, $3, $4, (
                                 SELECT nickname FROM users WHERE nickname = $5
@@ -233,6 +233,7 @@ class ForumService:
         except not_null_constraint_exception:
             return None, False
 
+        item.user = value['owner_nickname']
         return item, False
 
     async def create_thread(self, item: Thread) -> Tuple[Optional[Thread], bool]:
@@ -250,6 +251,8 @@ class ForumService:
             return None, False
 
         item.id = value['id']
+        item.author = value['author_nickname']
+        item.forum = value['forum_slug']
         return item, False
 
 

@@ -16,5 +16,5 @@ class Thread(BaseModel):
 
 
 class ThreadUpdate(BaseModel):
-    title: str
-    message: str
+    title: str = ''
+    message: str = ''
