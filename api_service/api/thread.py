@@ -1,0 +1,129 @@
+from datetime import datetime
+from typing import List
+
+from fastapi import APIRouter, Depends
+
+from api.dependency import filter_parameters, filter_posts_parameters
+from api.exceptions import HttpNotFoundException, HttpConflictException
+from db.postgres import foreign_key_violation_exception
+from models.post import Post
+from models.thread import Thread, ThreadUpdate
+from models.vote import Vote
+from services.thread import ThreadService, get_thread_service
+
+router = APIRouter()
+
+
+@router.post('/{slug_or_id}/create', status_code=201)
+async def create_post(
+        slug_or_id: str,
+        item: List[Post],
+        thread_service: ThreadService = Depends(get_thread_service)
+) -> List[Post]:
+    thread = await thread_service.get_by_slug_or_id(slug_or_id)
+    if not thread:
+        await thread_service.db.close()  # FIXME говнокод
+        raise HttpNotFoundException()
+
+    now = datetime.now()
+    for post in item:
+        post.created = now
+        post.thread = thread.id
+        post.forum = thread.forum
+
+    posts, invalid_parents = await thread_service.create_posts(item)
+
+    await thread_service.db.close()  # FIXME говнокод
+    if invalid_parents:
+        raise HttpConflictException()
+    if not posts:
+        raise HttpNotFoundException()
+
+    return posts
+
+
+@router.get('/{slug_or_id}/details')
+async def get_thread_details(
+        slug_or_id: str,
+        thread_service: ThreadService = Depends(get_thread_service)
+) -> Thread:
+    thread = await thread_service.get_by_slug_or_id(slug_or_id)
+
+    await thread_service.db.close()  # FIXME говнокод
+    if not thread:
+        raise HttpNotFoundException()
+
+    return thread
+
+
+@router.post('/{slug_or_id}/details')
+async def edit_thread(
+        slug_or_id: str,
+        item: ThreadUpdate,
+        thread_service: ThreadService = Depends(get_thread_service)
+) -> Thread:
+    # TODO валидация
+    thread = await thread_service.update_by_slug_or_id(slug_or_id, item)
+
+    await thread_service.db.close()  # FIXME говнокод
+    if not thread:
+        raise HttpNotFoundException()
+
+    return thread
+
+
+@router.get('/{slug_or_id}/posts')
+async def get_thread_posts(
+        slug_or_id: str,
+        filter_params: dict = Depends(filter_posts_parameters),
+        sort: str = 'flat',
+        thread_service: ThreadService = Depends(get_thread_service)
+) -> List[Post]:
+    # TODO валидация sort
+    thread = None
+    if slug_or_id.isdigit():
+        thread = await thread_service.get_by_id(int(slug_or_id))
+
+    if not thread:
+        thread = await thread_service.get_by_slug(slug_or_id)
+    if not thread:
+        await thread_service.db.close()  # FIXME говнокод
+        raise HttpNotFoundException()
+
+    posts = await thread_service.get_posts(thread.id, filter_params, sort)
+
+    await thread_service.db.close()  # FIXME говнокод
+    return posts
+
+
+
+@router.post('/{slug_or_id}/vote')
+async def vote_for_thread(
+        slug_or_id: str,
+        item: Vote,
+        thread_service: ThreadService = Depends(get_thread_service)
+) -> Thread:
+    # TODO валидация (-1, 1)
+    if slug_or_id.isdigit():
+        try:
+            await thread_service.vote_by_id(int(slug_or_id), item)
+        except foreign_key_violation_exception:
+            pass
+        else:
+            thread = await thread_service.get_by_id(int(slug_or_id))
+            await thread_service.db.close()  # FIXME говнокод
+            return thread
+
+    thread = await thread_service.get_by_slug(slug_or_id)
+    if not thread:
+        await thread_service.db.close()  # FIXME говнокод
+        raise HttpNotFoundException()
+    await thread_service.vote_by_id(thread.id, item)
+    thread = await thread_service.get_by_id(thread.id)
+
+    await thread_service.db.close()  # FIXME говнокод
+
+    if not thread:
+        raise HttpNotFoundException()
+
+    return thread
