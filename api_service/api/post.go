@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"github.com/mailru/easyjson"
 	"github.com/valyala/fasthttp"
+	"strconv"
 )
 
 func GetPostDetails(ctx *fasthttp.RequestCtx) {
-	id := ctx.UserValue("id").(string)
+	id, _ := strconv.Atoi(ctx.UserValue("id").(string))
 
 	post := services.PostSrv.GetById(id)
 

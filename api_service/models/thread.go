@@ -4,7 +4,7 @@ import "time"
 
 //easyjson:json
 type Thread struct {
-	Id      int64     `json:"id,omitempty"`
+	Id      int       `json:"id,omitempty"`
 	Slug    string    `json:"slug,omitempty"`
 	Title   string    `json:"title,omitempty"`
 	Message string    `json:"message,omitempty"`
