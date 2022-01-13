@@ -82,6 +82,18 @@ class PostgressDbEngine:
         finally:
             await self._connection_pool.release(con)
 
+    async def insert_many(self, sql: str, *args):
+        if not self._connection_pool:
+            await self.connect()
+        con = await self._connection_pool.acquire()
+        try:
+            result = await con.fetch(sql, *args)
+            return result
+        except Exception as e:
+            raise
+        finally:
+            await self._connection_pool.release(con)
+
     async def update(self, sql: str, *args):
         if not self._connection_pool:
             await self.connect()

@@ -8,7 +8,6 @@ from models.post import Post
 from models.thread import Thread, ThreadUpdate
 from models.vote import Vote
 
-
 get_posts_since_sql = {
     True: {
         'flat': """SELECT id,
@@ -275,21 +274,31 @@ class ThreadService:
         )
 
     async def create_posts(self, posts: List[Post]) -> Tuple[Optional[List[Post]], bool]:
-        result_posts = []
         # TODO транзакционность
-        for post in posts:
-            try:
-                value = await self.db.insert(
-                    """INSERT INTO posts (thread_id, author_nickname, forum_slug, message, parent, created)
-                    VALUES ($1, $2, $3, $4, $5, $6)
-                    RETURNING id, thread_id, author_nickname, forum_slug, is_edited, message, parent, created""",
-                    post.thread, post.author, post.forum, post.message, post.parent, post.created
-                )
-            except (not_null_constraint_exception, foreign_key_violation_exception):
-                return None, False
-            except RaiseError as exc:
-                return None, True
-            result_posts.append(
+        values = ','.join([
+            "({}, '{}', '{}', '{}', {}, '{}')".format(
+                post.thread,
+                post.author,
+                post.forum,
+                post.message,
+                post.parent if post.parent else 'NULL',
+                post.created
+            )
+            for post in posts
+        ])
+        sql = """INSERT INTO posts (thread_id, author_nickname, forum_slug, message, parent, created)
+                VALUES {}
+                RETURNING id, thread_id, author_nickname, forum_slug, is_edited, message, parent, created"""\
+            .format(values)
+
+        try:
+            values = await self.db.insert_many(sql)
+        except (not_null_constraint_exception, foreign_key_violation_exception):
+            return None, False
+        except RaiseError as exc:
+            return None, True
+
+        return [
                 Post(
                     id=value['id'],
                     thread=value['thread_id'],
@@ -299,9 +308,8 @@ class ThreadService:
                     message=value['message'],
                     parent=value['parent'],
                     created=value['created']
-                )
-            )
-        return result_posts, False
+                ) for value in values
+            ], False
 
     async def update_by_slug_or_id(self, slug_or_id: str, item: ThreadUpdate) -> Optional[Thread]:
         thread = None
@@ -316,12 +324,12 @@ class ThreadService:
         thread_message = item.message if item.message else None
 
         value = await self.db.update(
-                """UPDATE threads
+            """UPDATE threads
 			SET title   = COALESCE(NULLIF($2, ''), title),
 				message = COALESCE(NULLIF($3, ''), message)
 			WHERE slug = $1
 			RETURNING id, slug, forum_slug, author_nickname, title, message, votes, created""",
-                slug, thread_title, thread_message
+            slug, thread_title, thread_message
         )
         if not value:
             return
