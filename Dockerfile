@@ -43,4 +43,4 @@ WORKDIR /app
 EXPOSE 5432
 EXPOSE 5000
 
-CMD service postgresql start && gunicorn main:app --workers 8 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:5000
+CMD service postgresql start && gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:5000
