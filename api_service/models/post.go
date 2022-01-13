@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+//easyjson:json
 type Post struct {
 	ID       int64     `json:"id,omitempty"`
 	Message  string    `json:"message,omitempty"`
@@ -13,10 +14,12 @@ type Post struct {
 	Thread   int64     `json:"thread,omitempty"`
 }
 
+//easyjson:json
 type PostUpdate struct {
 	Message string `json:"message,omitempty"`
 }
 
+//easyjson:json
 type FullPost struct {
 	Post   Post   `json:"post,omitempty"`
 	Author User   `json:"author,omitempty"`

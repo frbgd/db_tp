@@ -17,15 +17,15 @@ func NewThreadService(db *db.PostgresDbEngine) *ThreadService {
 	return srv
 }
 
-func (forum *ThreadService) GetBySlugOrId(slugOrId string) (*models.Thread, error) {
+func (forum *ThreadService) GetBySlugOrId(slugOrId string) *models.Thread {
 
 }
 
-func (forum *ThreadService) GetBySlug(slug string) (*models.Thread, error) {
+func (forum *ThreadService) GetBySlug(slug string) *models.Thread {
 
 }
 
-func (forum *ThreadService) GetById(id int64) (*models.Thread, error) {
+func (forum *ThreadService) GetById(id int) *models.Thread {
 
 }
 
@@ -49,6 +49,6 @@ func (forum *ThreadService) VoteById(id int64, item *models.Vote) error {
 
 }
 
-func (forum *ThreadService) GetPosts(threadId int64, desc string, limit string, since string, sort string) error {
+func (forum *ThreadService) GetPosts(threadId int64, desc string, limit string, since string, sort string) *models.Post[] {
 
 }

@@ -17,7 +17,7 @@ func NewForumService(db *db.PostgresDbEngine) *ForumService {
 	return srv
 }
 
-func (forum *ForumService) GetBySlug(slug string) (*models.Forum, error) {
+func (forum *ForumService) GetBySlug(slug string) *models.Forum {
 
 }
 
@@ -26,11 +26,11 @@ func (forum *ForumService) GetThreadBySlug(slug string) (*models.Thread, error) 
 
 }
 
-func (forum *ForumService) GetForumUsers(slug string, desc string, limit string, since string) (*models.User[], error) {
+func (forum *ForumService) GetForumUsers(slug string, desc string, limit string, since string) *models.User[] {
 
 }
 
-func (forum *ForumService) GetForumThreads(slug string, desc string, limit string, since string) (*models.Thread[], error) {
+func (forum *ForumService) GetForumThreads(slug string, desc string, limit string, since string) *models.Thread[] {
 
 }
 

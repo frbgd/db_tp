@@ -1,5 +1,6 @@
 package models
 
+//easyjson:json
 type Forum struct {
 	Slug    string `json:"slug,omitempty"`
 	Title   string `json:"title,omitempty"`

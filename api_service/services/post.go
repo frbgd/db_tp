@@ -30,7 +30,7 @@ func (forum *PostService) GetForumBySlug(slug string) (*models.Forum, error) {
 
 }
 
-func (forum *PostService) GetById(id int64) (*models.FullPost, error) {
+func (forum *PostService) GetById(id int64) *models.FullPost {
 
 }
 

@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+//easyjson:json
 type Thread struct {
 	Id      int64     `json:"id,omitempty"`
 	Slug    string    `json:"slug,omitempty"`
@@ -13,6 +14,7 @@ type Thread struct {
 	Votes   int       `json:"votes,omitempty"`
 }
 
+//easyjson:json
 type ThreadUpdate struct {
 	Title   string `json:"title,omitempty"`
 	Message string `json:"message,omitempty"`

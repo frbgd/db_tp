@@ -1,9 +1,31 @@
 package api
 
-import "github.com/valyala/fasthttp"
+import (
+	"db_tp/models"
+	"db_tp/services"
+	"fmt"
+	"github.com/mailru/easyjson"
+	"github.com/valyala/fasthttp"
+)
 
 func GetPostDetails(ctx *fasthttp.RequestCtx) {
+	id := ctx.UserValue("id").(string)
 
+	post := services.PostSrv.GetById(id)
+
+	if post == nil {
+		errMsg := models.ErrMsg{Message: fmt.Sprintf("Can't find post with id:  %s", id)}
+		response, _ := easyjson.Marshal(errMsg)
+		ctx.SetBody(response)
+		ctx.SetStatusCode(404)
+		ctx.SetContentType("application/json")
+		return
+	}
+
+	resp, _ := easyjson.Marshal(post)
+	ctx.Response.SetBody(resp)
+	ctx.SetContentType("application/json")
+	ctx.Response.SetStatusCode(200)
 }
 
 func EditPost(ctx *fasthttp.RequestCtx) {
