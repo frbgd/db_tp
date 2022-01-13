@@ -1,20 +1,10 @@
 DROP SCHEMA IF EXISTS public CASCADE;
 CREATE SCHEMA public;
 
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
 CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;
-
 COMMENT ON EXTENSION citext IS 'data type for case-insensitive character strings';
+
+-- functions
 
 CREATE FUNCTION public.add_new_forum_user() RETURNS trigger
     LANGUAGE plpgsql
@@ -27,8 +17,6 @@ BEGIN
     RETURN NULL;
 END;
 $$;
-
-
 ALTER FUNCTION public.add_new_forum_user() OWNER TO postgres;
 
 CREATE FUNCTION public.add_path_to_post() RETURNS trigger
@@ -57,8 +45,6 @@ BEGIN
     RETURN NEW;
 END;
 $$;
-
-
 ALTER FUNCTION public.add_path_to_post() OWNER TO postgres;
 
 CREATE FUNCTION public.increment_forum_posts() RETURNS trigger
@@ -72,8 +58,6 @@ BEGIN
     RETURN NEW;
 END;
 $$;
-
-
 ALTER FUNCTION public.increment_forum_posts() OWNER TO postgres;
 
 CREATE FUNCTION public.increment_forum_threads() RETURNS trigger
@@ -87,8 +71,6 @@ BEGIN
     RETURN NULL;
 END;
 $$;
-
-
 ALTER FUNCTION public.increment_forum_threads() OWNER TO postgres;
 
 CREATE FUNCTION public.insert_vote() RETURNS trigger
@@ -102,8 +84,6 @@ BEGIN
     RETURN NULL;
 END;
 $$;
-
-
 ALTER FUNCTION public.insert_vote() OWNER TO postgres;
 
 CREATE FUNCTION public.update_vote() RETURNS trigger
@@ -117,13 +97,12 @@ BEGIN
     RETURN NULL;
 END;
 $$;
-
-
 ALTER FUNCTION public.update_vote() OWNER TO postgres;
 
 SET default_tablespace = '';
-
 SET default_table_access_method = heap;
+
+-- tables
 
 CREATE UNLOGGED TABLE public.forums (
     slug public.citext NOT NULL,
@@ -132,16 +111,12 @@ CREATE UNLOGGED TABLE public.forums (
     posts bigint NOT NULL,
     owner_nickname public.citext NOT NULL
 );
-
-
 ALTER TABLE public.forums OWNER TO postgres;
 
 CREATE UNLOGGED TABLE public.forums_users_nicknames (
     forum_slug public.citext NOT NULL,
     user_nickname public.citext NOT NULL COLLATE pg_catalog.ucs_basic
 );
-
-
 ALTER TABLE public.forums_users_nicknames OWNER TO postgres;
 
 CREATE UNLOGGED TABLE public.users (
@@ -150,8 +125,6 @@ CREATE UNLOGGED TABLE public.users (
     fullname text NOT NULL,
     about text NOT NULL
 );
-
-
 ALTER TABLE public.users OWNER TO postgres;
 
 CREATE VIEW public.forums_users AS
@@ -163,8 +136,6 @@ CREATE VIEW public.forums_users AS
     u.about
    FROM (public.forums_users_nicknames fu_nicknames
      JOIN public.users u ON ((fu_nicknames.user_nickname OPERATOR(public.=) u.nickname)));
-
-
 ALTER TABLE public.forums_users OWNER TO postgres;
 
 CREATE UNLOGGED TABLE public.posts (
@@ -178,20 +149,14 @@ CREATE UNLOGGED TABLE public.posts (
     created timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     path bigint[] NOT NULL
 );
-
-
 ALTER TABLE public.posts OWNER TO postgres;
-
 CREATE SEQUENCE public.posts_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
 ALTER TABLE public.posts_id_seq OWNER TO postgres;
-
 ALTER SEQUENCE public.posts_id_seq OWNED BY public.posts.id;
 
 CREATE UNLOGGED TABLE public.threads (
@@ -204,10 +169,7 @@ CREATE UNLOGGED TABLE public.threads (
     votes integer DEFAULT 0 NOT NULL,
     created timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
-
-
 ALTER TABLE public.threads OWNER TO postgres;
-
 CREATE SEQUENCE public.threads_id_seq
     AS integer
     START WITH 1
@@ -215,10 +177,7 @@ CREATE SEQUENCE public.threads_id_seq
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
 ALTER TABLE public.threads_id_seq OWNER TO postgres;
-
 ALTER SEQUENCE public.threads_id_seq OWNED BY public.threads.id;
 
 CREATE UNLOGGED TABLE public.votes (
@@ -226,241 +185,68 @@ CREATE UNLOGGED TABLE public.votes (
     author_nickname public.citext NOT NULL,
     voice smallint NOT NULL
 );
-
-
 ALTER TABLE public.votes OWNER TO postgres;
 
 ALTER TABLE ONLY public.posts ALTER COLUMN id SET DEFAULT nextval('public.posts_id_seq'::regclass);
-
 ALTER TABLE ONLY public.threads ALTER COLUMN id SET DEFAULT nextval('public.threads_id_seq'::regclass);
-
 ALTER TABLE ONLY public.forums
     ADD CONSTRAINT forums_pkey PRIMARY KEY (slug);
-
 ALTER TABLE ONLY public.forums_users_nicknames
     ADD CONSTRAINT forums_users_nicknames_pk PRIMARY KEY (forum_slug, user_nickname);
-
 ALTER TABLE ONLY public.posts
     ADD CONSTRAINT posts_pkey PRIMARY KEY (id);
-
 ALTER TABLE ONLY public.threads
     ADD CONSTRAINT threads_pkey PRIMARY KEY (id);
-
 ALTER TABLE ONLY public.threads
     ADD CONSTRAINT threads_slug_key UNIQUE (slug);
-
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_email_key UNIQUE (email);
-
-
---
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (nickname);
-
-
---
--- Name: votes votes_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.votes
     ADD CONSTRAINT votes_pk PRIMARY KEY (thread_id, author_nickname);
 
-
---
--- Name: posts_id_created_thread_id_idx; Type: INDEX; Schema: public; Owner: postgres
---
+-- indices
 
 CREATE INDEX posts_id_created_thread_id_idx ON public.posts USING btree (id, created, thread_id);
-
-
---
--- Name: posts_id_path_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX posts_id_path_idx ON public.posts USING btree (id, path);
-
-
---
--- Name: posts_parent_id_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX posts_parent_id_idx ON public.posts USING btree (parent, id);
-
-
---
--- Name: posts_thread_id_id_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX posts_thread_id_id_idx ON public.posts USING btree (thread_id, id);
-
-
---
--- Name: posts_thread_id_parent_path_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX posts_thread_id_parent_path_idx ON public.posts USING btree (thread_id, parent, path);
-
-
---
--- Name: posts_thread_id_path1_id_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX posts_thread_id_path1_id_idx ON public.posts USING btree (thread_id, (path[1]), id);
-
-
---
--- Name: posts_thread_id_path_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX posts_thread_id_path_idx ON public.posts USING btree (thread_id, path);
-
-
---
--- Name: threads_forum_slug_created_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX threads_forum_slug_created_idx ON public.threads USING btree (forum_slug, created);
-
-
---
--- Name: users_nickname_email_include_other_idx; Type: INDEX; Schema: public; Owner: postgres
---
-
 CREATE INDEX users_nickname_email_include_other_idx ON public.users USING btree (nickname, email) INCLUDE (about, fullname);
 
-
---
--- Name: posts add_new_forum_user_after_insert_in_posts; Type: TRIGGER; Schema: public; Owner: postgres
---
+-- triggers
 
 CREATE TRIGGER add_new_forum_user_after_insert_in_posts AFTER INSERT ON public.posts FOR EACH ROW EXECUTE FUNCTION public.add_new_forum_user();
-
-
---
--- Name: threads add_new_forum_user_after_insert_in_threads; Type: TRIGGER; Schema: public; Owner: postgres
---
-
 CREATE TRIGGER add_new_forum_user_after_insert_in_threads AFTER INSERT ON public.threads FOR EACH ROW EXECUTE FUNCTION public.add_new_forum_user();
-
-
---
--- Name: posts add_path_to_post; Type: TRIGGER; Schema: public; Owner: postgres
---
-
 CREATE TRIGGER add_path_to_post BEFORE INSERT ON public.posts FOR EACH ROW EXECUTE FUNCTION public.add_path_to_post();
-
-
---
--- Name: posts increment_forum_posts_after_insert_on_threads; Type: TRIGGER; Schema: public; Owner: postgres
---
-
 CREATE TRIGGER increment_forum_posts_after_insert_on_threads BEFORE INSERT ON public.posts FOR EACH ROW EXECUTE FUNCTION public.increment_forum_posts();
-
-
---
--- Name: threads increment_forum_threads_after_insert_on_threads; Type: TRIGGER; Schema: public; Owner: postgres
---
-
 CREATE TRIGGER increment_forum_threads_after_insert_on_threads AFTER INSERT ON public.threads FOR EACH ROW EXECUTE FUNCTION public.increment_forum_threads();
-
-
---
--- Name: votes insert_vote_after_insert_on_threads; Type: TRIGGER; Schema: public; Owner: postgres
---
-
 CREATE TRIGGER insert_vote_after_insert_on_threads AFTER INSERT ON public.votes FOR EACH ROW EXECUTE FUNCTION public.insert_vote();
-
-
---
--- Name: votes update_vote_after_insert_on_threads; Type: TRIGGER; Schema: public; Owner: postgres
---
-
 CREATE TRIGGER update_vote_after_insert_on_threads AFTER UPDATE ON public.votes FOR EACH ROW EXECUTE FUNCTION public.update_vote();
 
-
---
--- Name: forums forums_owner_nickname_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
+-- foreign keys
 
 ALTER TABLE ONLY public.forums
     ADD CONSTRAINT forums_owner_nickname_fkey FOREIGN KEY (owner_nickname) REFERENCES public.users(nickname) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: forums_users_nicknames forums_users_nicknames_forum_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.forums_users_nicknames
     ADD CONSTRAINT forums_users_nicknames_forum_slug_fkey FOREIGN KEY (forum_slug) REFERENCES public.forums(slug) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: forums_users_nicknames forums_users_nicknames_user_nickname_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.forums_users_nicknames
     ADD CONSTRAINT forums_users_nicknames_user_nickname_fkey FOREIGN KEY (user_nickname) REFERENCES public.users(nickname) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: posts posts_author_nickname_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.posts
     ADD CONSTRAINT posts_author_nickname_fkey FOREIGN KEY (author_nickname) REFERENCES public.users(nickname) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: posts posts_forum_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.posts
     ADD CONSTRAINT posts_forum_slug_fkey FOREIGN KEY (forum_slug) REFERENCES public.forums(slug) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: posts posts_thread_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.posts
     ADD CONSTRAINT posts_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.threads(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: threads threads_author_nickname_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.threads
     ADD CONSTRAINT threads_author_nickname_fkey FOREIGN KEY (author_nickname) REFERENCES public.users(nickname) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: threads threads_forum_slug_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.threads
     ADD CONSTRAINT threads_forum_slug_fkey FOREIGN KEY (forum_slug) REFERENCES public.forums(slug) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: votes votes_author_nickname_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.votes
     ADD CONSTRAINT votes_author_nickname_fkey FOREIGN KEY (author_nickname) REFERENCES public.users(nickname) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: votes votes_thread_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
 ALTER TABLE ONLY public.votes
     ADD CONSTRAINT votes_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.threads(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- PostgreSQL database dump complete
---
