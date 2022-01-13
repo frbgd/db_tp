@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 from api.exceptions import HttpNotFoundException
 from models.post import FullPost, PostUpdate

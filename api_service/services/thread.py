@@ -1,9 +1,8 @@
 from typing import Optional, List, Tuple
 
 from asyncpg import RaiseError
-from fastapi import Depends
 
-from db.postgres import PostgressDbEngine, get_postgres, not_null_constraint_exception, foreign_key_violation_exception
+from db.postgres import PostgressDbEngine, not_null_constraint_exception, foreign_key_violation_exception
 from models.post import Post
 from models.thread import Thread, ThreadUpdate
 from models.vote import Vote

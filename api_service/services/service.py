@@ -1,6 +1,4 @@
-from fastapi import Depends
-
-from db.postgres import PostgressDbEngine, get_postgres
+from db.postgres import PostgressDbEngine
 from models.status import Status
 
 

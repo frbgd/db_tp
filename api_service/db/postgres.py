@@ -4,8 +4,6 @@ from typing import Dict, Any
 
 from asyncpg import Connection, UniqueViolationError, NotNullViolationError, ForeignKeyViolationError
 
-from core.config import dsl
-
 
 async def create_postgres_instance(**dsl: Dict[str, Any]) -> Connection:
     """Потому что в конструкторе класса нельзя вызывать await"""
@@ -46,7 +44,7 @@ class PostgressDbEngine:
         if not self._connection_pool:
             await self._connection_pool.close()
 
-    async def get_one(self, sql: str, *args):
+    async def _fetchrow(self, sql: str, *args):
         if not self._connection_pool:
             await self.connect()
         con = await self._connection_pool.acquire()
@@ -57,54 +55,33 @@ class PostgressDbEngine:
             raise
         finally:
             await self._connection_pool.release(con)
+
+    async def _fetch(self, sql: str, *args):
+        if not self._connection_pool:
+            await self.connect()
+        con = await self._connection_pool.acquire()
+        try:
+            result = await con.fetch(sql, *args)
+            return result
+        except Exception as e:
+            raise
+        finally:
+            await self._connection_pool.release(con)
+
+    async def get_one(self, sql: str, *args):
+        return await self._fetchrow(sql, *args)
 
     async def get_many(self, sql: str, *args):
-        if not self._connection_pool:
-            await self.connect()
-        con = await self._connection_pool.acquire()
-        try:
-            result = await con.fetch(sql, *args)
-            return result
-        except Exception as e:
-            raise
-        finally:
-            await self._connection_pool.release(con)
+        return await self._fetch(sql, *args)
 
     async def insert(self, sql: str, *args):
-        if not self._connection_pool:
-            await self.connect()
-        con = await self._connection_pool.acquire()
-        try:
-            result = await con.fetchrow(sql, *args)
-            return result
-        except Exception as e:
-            raise
-        finally:
-            await self._connection_pool.release(con)
+        return await self._fetchrow(sql, *args)
 
     async def insert_many(self, sql: str, *args):
-        if not self._connection_pool:
-            await self.connect()
-        con = await self._connection_pool.acquire()
-        try:
-            result = await con.fetch(sql, *args)
-            return result
-        except Exception as e:
-            raise
-        finally:
-            await self._connection_pool.release(con)
+        return await self._fetch(sql, *args)
 
     async def update(self, sql: str, *args):
-        if not self._connection_pool:
-            await self.connect()
-        con = await self._connection_pool.acquire()
-        try:
-            result = await con.fetchrow(sql, *args)
-            return result
-        except Exception as e:
-            raise
-        finally:
-            await self._connection_pool.release(con)
+        return await self._fetchrow(sql, *args)
 
     async def execute(self, sql, *args):
         if not self._connection_pool:

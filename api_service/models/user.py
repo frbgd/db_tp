@@ -11,7 +11,6 @@ class User(BaseModel):
     about: str
 
     class Config:
-        # Заменяем стандартную работу с json на более быструю
         json_loads = orjson.loads
         json_dumps = orjson_dumps
 
@@ -22,6 +21,5 @@ class UserUpdate(BaseModel):
     about: str = ''
 
     class Config:
-        # Заменяем стандартную работу с json на более быструю
         json_loads = orjson.loads
         json_dumps = orjson_dumps

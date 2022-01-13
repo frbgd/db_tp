@@ -1,8 +1,6 @@
 from typing import Optional, List, Tuple
 
-from fastapi import Depends
-
-from db.postgres import PostgressDbEngine, get_postgres, item_not_unique_exception, not_null_constraint_exception
+from db.postgres import PostgressDbEngine, item_not_unique_exception, not_null_constraint_exception
 from models.forum import Forum
 from models.thread import Thread
 from models.user import User

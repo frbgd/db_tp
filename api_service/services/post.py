@@ -1,8 +1,6 @@
 from typing import Optional
 
-from fastapi import Depends
-
-from db.postgres import PostgressDbEngine, get_postgres
+from db.postgres import PostgressDbEngine
 from models.forum import Forum
 from models.post import Post, FullPost, PostUpdate
 from models.thread import Thread
@@ -122,10 +120,7 @@ class PostService:
         )
 
     async def update_by_id(self, id_: int, item: PostUpdate) -> Optional[Post]:
-        if item.message:
-            post_message = item.message
-        else:
-            post_message = None
+        post_message = item.message if item.message else None
 
         value = await self.db.update(
             """UPDATE posts

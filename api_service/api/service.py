@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from starlette.responses import Response
 
 from models.status import Status

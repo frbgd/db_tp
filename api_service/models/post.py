@@ -21,7 +21,6 @@ class Post(BaseModel):
     thread: int = 0
 
     class Config:
-        # Заменяем стандартную работу с json на более быструю
         json_loads = orjson.loads
         json_dumps = orjson_dumps
 
@@ -33,7 +32,6 @@ class FullPost(BaseModel):
     forum: Forum = None
 
     class Config:
-        # Заменяем стандартную работу с json на более быструю
         json_loads = orjson.loads
         json_dumps = orjson_dumps
 
@@ -42,6 +40,5 @@ class PostUpdate(BaseModel):
     message: str = ''
 
     class Config:
-        # Заменяем стандартную работу с json на более быструю
         json_loads = orjson.loads
         json_dumps = orjson_dumps

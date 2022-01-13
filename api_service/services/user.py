@@ -1,8 +1,6 @@
 from typing import Optional, Tuple, List
 
-from fastapi import Depends
-
-from db.postgres import PostgressDbEngine, get_postgres, item_not_unique_exception
+from db.postgres import PostgressDbEngine, item_not_unique_exception
 from models.user import User, UserUpdate
 
 

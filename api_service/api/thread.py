@@ -35,7 +35,6 @@ async def create_post(
 
     posts, invalid_parents = await thread_service.create_posts(item)
 
-    
     if invalid_parents:
         raise HttpConflictException()
     if not posts:
@@ -50,7 +49,6 @@ async def get_thread_details(
 ) -> Thread:
     thread = await thread_service.get_by_slug_or_id(slug_or_id)
 
-    
     if not thread:
         raise HttpNotFoundException()
 
@@ -88,9 +86,7 @@ async def get_thread_posts(
 
     posts = await thread_service.get_posts(thread.id, filter_params, sort)
 
-    
     return posts
-
 
 
 @router.post('/{slug_or_id}/vote')

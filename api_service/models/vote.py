@@ -9,6 +9,5 @@ class Vote(BaseModel):
     voice: int
 
     class Config:
-        # Заменяем стандартную работу с json на более быструю
         json_loads = orjson.loads
         json_dumps = orjson_dumps
