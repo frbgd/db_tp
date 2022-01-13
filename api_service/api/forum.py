@@ -18,7 +18,6 @@ async def create_forum(
         item: Forum,
         response: Response
 ):
-    # TODO валидировать входные данные форума (числа, slug)
     forum, not_unique = await forum_service.create_forum(item)
 
     if not forum:
@@ -47,8 +46,6 @@ async def create_thread(
         item: Thread,
         response: Response
 ):
-    # TODO валидировать входные данные топика (slug, created)
-    # TODO возможно надо title переводить в slug
     if not item.forum:
         item.forum = slug
     thread, not_unique = await forum_service.create_thread(item)
@@ -61,7 +58,6 @@ async def create_thread(
     return thread
 
 
-# TODO оттестить параметры
 @router.get('/{slug}/users')
 async def get_forum_users(
         slug: str,
@@ -78,7 +74,6 @@ async def get_forum_users(
     return users
 
 
-# TODO оттестить параметры
 @router.get('/{slug}/threads')
 async def get_forum_threads(
         slug: str,

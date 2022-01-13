@@ -3,8 +3,6 @@ from typing import Optional, Dict, Union, Any
 
 from fastapi import HTTPException
 
-# TODO передавать detail в конструкторе
-
 
 class HttpNotFoundException(HTTPException):
     status_code = HTTPStatus.NOT_FOUND

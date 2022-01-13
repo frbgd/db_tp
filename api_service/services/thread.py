@@ -274,7 +274,6 @@ class ThreadService:
         )
 
     async def create_posts(self, posts: List[Post]) -> Tuple[Optional[List[Post]], bool]:
-        # TODO транзакционность
         values = ','.join([
             "({}, '{}', '{}', '{}', {}, '{}')".format(
                 post.thread,

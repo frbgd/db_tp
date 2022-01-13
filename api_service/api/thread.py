@@ -62,9 +62,7 @@ async def edit_thread(
         slug_or_id: str,
         item: ThreadUpdate
 ) -> Thread:
-    # TODO валидация
     thread = await thread_service.update_by_slug_or_id(slug_or_id, item)
-
     
     if not thread:
         raise HttpNotFoundException()
@@ -78,7 +76,6 @@ async def get_thread_posts(
         filter_params: dict = Depends(filter_posts_parameters),
         sort: str = 'flat'
 ) -> List[Post]:
-    # TODO валидация sort
     thread = None
     if slug_or_id.isdigit():
         thread = await thread_service.get_by_id(int(slug_or_id))
@@ -101,7 +98,6 @@ async def vote_for_thread(
         slug_or_id: str,
         item: Vote
 ) -> Thread:
-    # TODO валидация (-1, 1)
     if slug_or_id.isdigit():
         try:
             await thread_service.vote_by_id(int(slug_or_id), item)

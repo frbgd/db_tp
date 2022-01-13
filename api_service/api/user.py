@@ -15,7 +15,6 @@ async def create_user(
         nickname: str,
         item: User,
 ):
-    # TODO валидация
     item.nickname = nickname
     users, not_unique = await user_service.create_user(item)
     if not_unique:
@@ -49,7 +48,6 @@ async def edit_user_details(
         nickname: str,
         item: UserUpdate,
 ) -> User:
-    # TODO валидация
     user, not_unique = await user_service.update_by_nickname(nickname, item)
     if not_unique:
         raise HttpConflictException()

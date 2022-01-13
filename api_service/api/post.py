@@ -12,7 +12,6 @@ async def get_post_details(
         id: int,
         related: str = None,
 ) -> FullPost:
-    # TODO related поле
     post = await post_service.get_by_id(id)
 
     if not post:
@@ -36,7 +35,6 @@ async def edit_post(
         id: int,
         item: PostUpdate
 ):
-    # TODO валидация
     post = await post_service.update_by_id(id, item)
 
     if not post:
