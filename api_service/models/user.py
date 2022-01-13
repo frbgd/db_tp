@@ -1,4 +1,7 @@
+import orjson
 from pydantic import BaseModel
+
+from models.common import orjson_dumps
 
 
 class User(BaseModel):
@@ -7,8 +10,18 @@ class User(BaseModel):
     nickname: str = ''
     about: str
 
+    class Config:
+        # Заменяем стандартную работу с json на более быструю
+        json_loads = orjson.loads
+        json_dumps = orjson_dumps
+
 
 class UserUpdate(BaseModel):
     email: str = ''
     fullname: str = ''
     about: str = ''
+
+    class Config:
+        # Заменяем стандартную работу с json на более быструю
+        json_loads = orjson.loads
+        json_dumps = orjson_dumps

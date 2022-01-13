@@ -1,7 +1,10 @@
 from datetime import datetime
 from typing import Optional
 
+import orjson
 from pydantic import BaseModel
+
+from models.common import orjson_dumps
 
 
 class Thread(BaseModel):
@@ -14,7 +17,17 @@ class Thread(BaseModel):
     forum: str = ''
     votes: int = 0
 
+    class Config:
+        # Заменяем стандартную работу с json на более быструю
+        json_loads = orjson.loads
+        json_dumps = orjson_dumps
+
 
 class ThreadUpdate(BaseModel):
     title: str = ''
     message: str = ''
+
+    class Config:
+        # Заменяем стандартную работу с json на более быструю
+        json_loads = orjson.loads
+        json_dumps = orjson_dumps
