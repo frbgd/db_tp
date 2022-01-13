@@ -11,7 +11,7 @@ get_posts_since_sql = {
     True: {
         'flat': """SELECT id,
 				   thread_id,
-				   author_nickname,
+				   user_nickname,
 				   forum_slug,
 				   is_edited,
 				   message,
@@ -24,7 +24,7 @@ get_posts_since_sql = {
 			LIMIT $3""",
         'tree': """SELECT id,
 				   thread_id,
-				   author_nickname,
+				   user_nickname,
 				   forum_slug,
 				   is_edited,
 				   message,
@@ -46,7 +46,7 @@ get_posts_since_sql = {
 			)
 			SELECT id,
 				   thread_id,
-				   author_nickname,
+				   user_nickname,
 				   forum_slug,
 				   is_edited,
 				   message,
@@ -60,7 +60,7 @@ get_posts_since_sql = {
     False: {
         'flat': """SELECT id,
 				   thread_id,
-				   author_nickname,
+				   user_nickname,
 				   forum_slug,
 				   is_edited,
 				   message,
@@ -73,7 +73,7 @@ get_posts_since_sql = {
 			LIMIT $3""",
         'tree': """SELECT id,
 				   thread_id,
-				   author_nickname,
+				   user_nickname,
 				   forum_slug,
 				   is_edited,
 				   message,
@@ -95,7 +95,7 @@ get_posts_since_sql = {
 			)
 			SELECT id,
 				   thread_id,
-				   author_nickname,
+				   user_nickname,
 				   forum_slug,
 				   is_edited,
 				   message,
@@ -112,7 +112,7 @@ get_posts_sql = {
     True: {
         'flat': """SELECT id,
 				   thread_id,
-				   author_nickname,
+				   user_nickname,
 				   forum_slug,
 				   is_edited,
 				   message,
@@ -124,7 +124,7 @@ get_posts_sql = {
 			LIMIT $2""",
         'tree': """SELECT id,
 				   thread_id,
-				   author_nickname,
+				   user_nickname,
 				   forum_slug,
 				   is_edited,
 				   message,
@@ -143,7 +143,7 @@ get_posts_sql = {
 			)
 			SELECT id,
 				   thread_id,
-				   author_nickname,
+				   user_nickname,
 				   forum_slug,
 				   is_edited,
 				   message,
@@ -157,7 +157,7 @@ get_posts_sql = {
     False: {
         'flat': """SELECT id,
 				   thread_id,
-				   author_nickname,
+				   user_nickname,
 				   forum_slug,
 				   is_edited,
 				   message,
@@ -169,7 +169,7 @@ get_posts_sql = {
 			LIMIT $2""",
         'tree': """SELECT id,
 					   thread_id,
-					   author_nickname,
+					   user_nickname,
 					   forum_slug,
 					   is_edited,
 					   message,
@@ -188,7 +188,7 @@ get_posts_sql = {
 			)
 			SELECT id,
 				   thread_id,
-				   author_nickname,
+				   user_nickname,
 				   forum_slug,
 				   is_edited,
 				   message,
@@ -219,7 +219,7 @@ class ThreadService:
             """SELECT id,
 				   slug,
 				   forum_slug,
-				   author_nickname,
+				   user_nickname,
 				   title,
 				   message,
 				   votes,
@@ -238,7 +238,7 @@ class ThreadService:
             title=value['title'],
             message=value['message'],
             created=value['created'],
-            author=value['author_nickname'],
+            author=value['user_nickname'],
             forum=value['forum_slug'],
             votes=value['votes']
         )
@@ -248,7 +248,7 @@ class ThreadService:
             """SELECT id,
                    slug,
                    forum_slug,
-                   author_nickname,
+                   user_nickname,
                    title,
                    message,
                    votes,
@@ -267,7 +267,7 @@ class ThreadService:
             title=value['title'],
             message=value['message'],
             created=value['created'],
-            author=value['author_nickname'],
+            author=value['user_nickname'],
             forum=value['forum_slug'],
             votes=value['votes']
         )
@@ -284,9 +284,9 @@ class ThreadService:
             )
             for post in posts
         ])
-        sql = """INSERT INTO posts (thread_id, author_nickname, forum_slug, message, parent, created)
+        sql = """INSERT INTO posts (thread_id, user_nickname, forum_slug, message, parent, created)
                 VALUES {}
-                RETURNING id, thread_id, author_nickname, forum_slug, is_edited, message, parent, created"""\
+                RETURNING id, thread_id, user_nickname, forum_slug, is_edited, message, parent, created"""\
             .format(values)
 
         try:
@@ -300,7 +300,7 @@ class ThreadService:
                 Post(
                     id=value['id'],
                     thread=value['thread_id'],
-                    author=value['author_nickname'],
+                    author=value['user_nickname'],
                     forum=value['forum_slug'],
                     isEdited=value['is_edited'],
                     message=value['message'],
@@ -326,7 +326,7 @@ class ThreadService:
 			SET title   = COALESCE(NULLIF($2, ''), title),
 				message = COALESCE(NULLIF($3, ''), message)
 			WHERE slug = $1
-			RETURNING id, slug, forum_slug, author_nickname, title, message, votes, created""",
+			RETURNING id, slug, forum_slug, user_nickname, title, message, votes, created""",
             slug, thread_title, thread_message
         )
         if not value:
@@ -338,7 +338,7 @@ class ThreadService:
             title=value['title'],
             message=value['message'],
             created=value['created'],
-            author=value['author_nickname'],
+            author=value['user_nickname'],
             forum=value['forum_slug'],
             votes=value['votes']
         )
@@ -352,7 +352,7 @@ class ThreadService:
 			SET title   = COALESCE(NULLIF($2, ''), title),
 				message = COALESCE(NULLIF($3, ''), message)
 			WHERE id = $1
-			RETURNING id, slug, forum_slug, author_nickname, title, message, votes, created""",
+			RETURNING id, slug, forum_slug, user_nickname, title, message, votes, created""",
             id_, thread_title, thread_message
         )
         if not value:
@@ -364,7 +364,7 @@ class ThreadService:
             title=value['title'],
             message=value['message'],
             created=value['created'],
-            author=value['author_nickname'],
+            author=value['user_nickname'],
             forum=value['forum_slug'],
             votes=value['votes']
         )
@@ -375,9 +375,9 @@ class ThreadService:
         voice = item.voice
         # ¯\_(ツ)_/¯
         await self.db.execute(
-            """INSERT INTO votes (thread_id, author_nickname, voice)
+            """INSERT INTO votes (thread_id, user_nickname, voice)
 			VALUES ($1, $2, $3)
-			ON CONFLICT (thread_id, author_nickname) DO UPDATE SET voice = $3""",
+			ON CONFLICT (thread_id, user_nickname) DO UPDATE SET voice = $3""",
             id_, nickname, voice
         )
 
@@ -403,7 +403,7 @@ class ThreadService:
             Post(
                 id=value['id'],
                 thread=value['thread_id'],
-                author=value['author_nickname'],
+                author=value['user_nickname'],
                 forum=value['forum_slug'],
                 isEdited=value['is_edited'],
                 message=value['message'],

@@ -49,7 +49,7 @@ get_threads_by_forum_slug_since_sql = {
     True: """SELECT id,
 			   slug,
 			   forum_slug,
-			   author_nickname,
+			   user_nickname,
 			   title,
 			   message,
 			   votes,
@@ -61,7 +61,7 @@ get_threads_by_forum_slug_since_sql = {
     False: """SELECT id,
 			   slug,
 			   forum_slug,
-			   author_nickname,
+			   user_nickname,
 			   title,
 			   message,
 			   votes,
@@ -76,7 +76,7 @@ get_threads_by_forum_slug_sql = {
     True: """SELECT id,
 			   slug,
 			   forum_slug,
-			   author_nickname,
+			   user_nickname,
 			   title,
 			   message,
 			   votes,
@@ -88,7 +88,7 @@ get_threads_by_forum_slug_sql = {
     False: """SELECT id,
 			   slug,
 			   forum_slug,
-			   author_nickname,
+			   user_nickname,
 			   title,
 			   message,
 			   votes,
@@ -129,7 +129,7 @@ class ForumService:
             """SELECT id,
 				   slug,
 				   forum_slug,
-				   author_nickname,
+				   user_nickname,
 				   title,
 				   message,
 				   votes,
@@ -148,7 +148,7 @@ class ForumService:
             title=value['title'],
             message=value['message'],
             created=value['created'],
-            author=value['author_nickname'],
+            author=value['user_nickname'],
             forum=value['forum_slug'],
             votes=value['votes']
         )
@@ -211,7 +211,7 @@ class ForumService:
                     title=value['title'],
                     message=value['message'],
                     created=value['created'],
-                    author=value['author_nickname'],
+                    author=value['user_nickname'],
                     forum=value['forum_slug'],
                     votes=value['votes']
                 ) for value in values
@@ -237,10 +237,10 @@ class ForumService:
     async def create_thread(self, item: Thread) -> Tuple[Optional[Thread], bool]:
         try:
             value = await self.db.insert(
-                """INSERT INTO threads (slug, author_nickname, title, message, created, forum_slug)
+                """INSERT INTO threads (slug, user_nickname, title, message, created, forum_slug)
 			VALUES ($1, (SELECT nickname FROM users WHERE nickname = $2), $3, $4, $5,
 					(SELECT slug FROM forums WHERE slug = $6))
-			RETURNING id, author_nickname, forum_slug, created""",
+			RETURNING id, user_nickname, forum_slug, created""",
                 item.slug, item.author, item.title, item.message, item.created, item.forum
             )
         except item_not_unique_exception:
@@ -249,7 +249,7 @@ class ForumService:
             return None, False
 
         item.id = value['id']
-        item.author = value['author_nickname']
+        item.author = value['user_nickname']
         item.forum = value['forum_slug']
         return item, False
 

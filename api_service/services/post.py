@@ -37,7 +37,7 @@ class PostService:
             """SELECT id,
 				   slug,
 				   forum_slug,
-				   author_nickname,
+				   user_nickname,
 				   title,
 				   message,
 				   votes,
@@ -56,7 +56,7 @@ class PostService:
             title=value['title'],
             message=value['message'],
             created=value['created'],
-            author=value['author_nickname'],
+            author=value['user_nickname'],
             forum=value['forum_slug'],
             votes=value['votes']
         )
@@ -84,7 +84,7 @@ class PostService:
         value = await self.db.get_one(
             """SELECT id,
 				   thread_id,
-				   author_nickname,
+				   user_nickname,
 				   forum_slug,
 				   is_edited,
 				   message,
@@ -99,7 +99,7 @@ class PostService:
             return
 
         # TODO переместить в соответствующие сервисы
-        author = await self.get_user_by_nickname(value['author_nickname'])
+        author = await self.get_user_by_nickname(value['user_nickname'])
         thread = await self.get_thread_by_id(value['thread_id'])
         forum = await self.get_forum_by_slug(value['forum_slug'])
 
@@ -108,7 +108,7 @@ class PostService:
                 id=value['id'],
                 message=value['message'],
                 created=value['created'],
-                author=value['author_nickname'],
+                author=value['user_nickname'],
                 forum=value['forum_slug'],
                 isEdited=value['is_edited'],
                 parent=value['parent'],
@@ -131,7 +131,7 @@ class PostService:
 								ELSE FALSE
 					END
 			WHERE id = $1
-			RETURNING id, thread_id, author_nickname, forum_slug, is_edited, message, parent, created
+			RETURNING id, thread_id, user_nickname, forum_slug, is_edited, message, parent, created
 			""",
         id_, post_message)
 
@@ -142,7 +142,7 @@ class PostService:
             id=value['id'],
             message=value['message'],
             created=value['created'],
-            author=value['author_nickname'],
+            author=value['user_nickname'],
             forum=value['forum_slug'],
             isEdited=value['is_edited'],
             parent=value['parent'],

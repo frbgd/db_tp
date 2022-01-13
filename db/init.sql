@@ -6,20 +6,17 @@ COMMENT ON EXTENSION citext IS 'data type for case-insensitive character strings
 
 -- functions
 
-CREATE FUNCTION public.add_new_forum_user() RETURNS trigger
+CREATE FUNCTION public.insert_forum_user() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-    INSERT INTO forums_users_nicknames (forum_slug, user_nickname)
-    VALUES (NEW.forum_slug, NEW.author_nickname)
-    ON CONFLICT DO NOTHING;
-
+    INSERT INTO forums_users_nicknames (forum_slug, user_nickname) VALUES (NEW.forum_slug, NEW.user_nickname) ON CONFLICT DO NOTHING;
     RETURN NULL;
 END;
 $$;
-ALTER FUNCTION public.add_new_forum_user() OWNER TO postgres;
+ALTER FUNCTION public.insert_forum_user() OWNER TO postgres;
 
-CREATE FUNCTION public.add_path_to_post() RETURNS trigger
+CREATE FUNCTION public.insert_post_path() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -28,11 +25,7 @@ BEGIN
     IF NEW.parent IS NULL THEN
         NEW.path := NEW.path || NEW.id;
     ELSE
-        SELECT path
-        FROM posts
-        WHERE id = NEW.parent
-          AND thread_id = NEW.thread_id
-        INTO parent_path;
+        SELECT path FROM posts WHERE id = NEW.parent AND thread_id = NEW.thread_id INTO parent_path;
 
         IF (COALESCE(ARRAY_LENGTH(parent_path, 1), 0) = 0) THEN
             RAISE EXCEPTION
@@ -45,42 +38,33 @@ BEGIN
     RETURN NEW;
 END;
 $$;
-ALTER FUNCTION public.add_path_to_post() OWNER TO postgres;
+ALTER FUNCTION public.insert_post_path() OWNER TO postgres;
 
-CREATE FUNCTION public.increment_forum_posts() RETURNS trigger
+CREATE FUNCTION public.inc_forum_posts() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-    UPDATE forums
-    SET posts = posts + 1
-    WHERE slug = NEW.forum_slug;
-
+    UPDATE forums SET posts = posts + 1 WHERE slug = NEW.forum_slug;
     RETURN NEW;
 END;
 $$;
-ALTER FUNCTION public.increment_forum_posts() OWNER TO postgres;
+ALTER FUNCTION public.inc_forum_posts() OWNER TO postgres;
 
-CREATE FUNCTION public.increment_forum_threads() RETURNS trigger
+CREATE FUNCTION public.inc_forum_threads() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-    UPDATE forums
-    SET threads = threads + 1
-    WHERE slug = NEW.forum_slug;
-
+    UPDATE forums SET threads = threads + 1 WHERE slug = NEW.forum_slug;
     RETURN NULL;
 END;
 $$;
-ALTER FUNCTION public.increment_forum_threads() OWNER TO postgres;
+ALTER FUNCTION public.inc_forum_threads() OWNER TO postgres;
 
 CREATE FUNCTION public.insert_vote() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-    UPDATE threads
-    SET votes = votes + NEW.voice
-    WHERE id = NEW.thread_id;
-
+    UPDATE threads SET votes = votes + NEW.voice WHERE id = NEW.thread_id;
     RETURN NULL;
 END;
 $$;
@@ -90,10 +74,7 @@ CREATE FUNCTION public.update_vote() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-    UPDATE threads
-    SET votes = votes + NEW.voice - OLD.voice
-    WHERE id = NEW.thread_id;
-
+    UPDATE threads SET votes = votes + NEW.voice - OLD.voice WHERE id = NEW.thread_id;
     RETURN NULL;
 END;
 $$;
@@ -141,7 +122,7 @@ ALTER TABLE public.forums_users OWNER TO postgres;
 CREATE UNLOGGED TABLE public.posts (
     id bigint NOT NULL,
     thread_id integer NOT NULL,
-    author_nickname public.citext NOT NULL,
+    user_nickname public.citext NOT NULL,
     forum_slug public.citext NOT NULL,
     is_edited boolean DEFAULT false NOT NULL,
     message text NOT NULL,
@@ -163,7 +144,7 @@ CREATE UNLOGGED TABLE public.threads (
     id integer NOT NULL,
     slug public.citext,
     forum_slug public.citext NOT NULL,
-    author_nickname public.citext NOT NULL,
+    user_nickname public.citext NOT NULL,
     title text NOT NULL,
     message text NOT NULL,
     votes integer DEFAULT 0 NOT NULL,
@@ -182,7 +163,7 @@ ALTER SEQUENCE public.threads_id_seq OWNED BY public.threads.id;
 
 CREATE UNLOGGED TABLE public.votes (
     thread_id integer NOT NULL,
-    author_nickname public.citext NOT NULL,
+    user_nickname public.citext NOT NULL,
     voice smallint NOT NULL
 );
 ALTER TABLE public.votes OWNER TO postgres;
@@ -204,27 +185,27 @@ ALTER TABLE ONLY public.users
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_pkey PRIMARY KEY (nickname);
 ALTER TABLE ONLY public.votes
-    ADD CONSTRAINT votes_pk PRIMARY KEY (thread_id, author_nickname);
+    ADD CONSTRAINT votes_pk PRIMARY KEY (thread_id, user_nickname);
 
 -- indices
 
-CREATE INDEX posts_id_created_thread_id_idx ON public.posts USING btree (id, created, thread_id);
-CREATE INDEX posts_id_path_idx ON public.posts USING btree (id, path);
-CREATE INDEX posts_parent_id_idx ON public.posts USING btree (parent, id);
-CREATE INDEX posts_thread_id_id_idx ON public.posts USING btree (thread_id, id);
-CREATE INDEX posts_thread_id_parent_path_idx ON public.posts USING btree (thread_id, parent, path);
-CREATE INDEX posts_thread_id_path1_id_idx ON public.posts USING btree (thread_id, (path[1]), id);
-CREATE INDEX posts_thread_id_path_idx ON public.posts USING btree (thread_id, path);
-CREATE INDEX threads_forum_slug_created_idx ON public.threads USING btree (forum_slug, created);
-CREATE INDEX users_nickname_email_include_other_idx ON public.users USING btree (nickname, email) INCLUDE (about, fullname);
+CREATE INDEX idx_posts_id_created_thread_id ON public.posts USING btree (id, created, thread_id);
+CREATE INDEX idx_posts_id_path ON public.posts USING btree (id, path);
+CREATE INDEX idx_posts_parent_id ON public.posts USING btree (parent, id);
+CREATE INDEX idx_posts_thread_id_id ON public.posts USING btree (thread_id, id);
+CREATE INDEX idx_posts_thread_id_parent_path ON public.posts USING btree (thread_id, parent, path);
+CREATE INDEX idx_posts_thread_id_path1_id ON public.posts USING btree (thread_id, (path[1]), id);
+CREATE INDEX idx_posts_thread_id_path ON public.posts USING btree (thread_id, path);
+CREATE INDEX idx_threads_forum_slug_created ON public.threads USING btree (forum_slug, created);
+CREATE INDEX idx_users_nickname_email_include_about_fullname ON public.users USING btree (nickname, email) INCLUDE (about, fullname);
 
 -- triggers
 
-CREATE TRIGGER add_new_forum_user_after_insert_in_posts AFTER INSERT ON public.posts FOR EACH ROW EXECUTE FUNCTION public.add_new_forum_user();
-CREATE TRIGGER add_new_forum_user_after_insert_in_threads AFTER INSERT ON public.threads FOR EACH ROW EXECUTE FUNCTION public.add_new_forum_user();
-CREATE TRIGGER add_path_to_post BEFORE INSERT ON public.posts FOR EACH ROW EXECUTE FUNCTION public.add_path_to_post();
-CREATE TRIGGER increment_forum_posts_after_insert_on_threads BEFORE INSERT ON public.posts FOR EACH ROW EXECUTE FUNCTION public.increment_forum_posts();
-CREATE TRIGGER increment_forum_threads_after_insert_on_threads AFTER INSERT ON public.threads FOR EACH ROW EXECUTE FUNCTION public.increment_forum_threads();
+CREATE TRIGGER insert_forum_user_after_insert_in_posts AFTER INSERT ON public.posts FOR EACH ROW EXECUTE FUNCTION public.insert_forum_user();
+CREATE TRIGGER insert_forum_user_after_insert_in_threads AFTER INSERT ON public.threads FOR EACH ROW EXECUTE FUNCTION public.insert_forum_user();
+CREATE TRIGGER insert_post_path BEFORE INSERT ON public.posts FOR EACH ROW EXECUTE FUNCTION public.insert_post_path();
+CREATE TRIGGER inc_forum_posts_after_insert_on_threads BEFORE INSERT ON public.posts FOR EACH ROW EXECUTE FUNCTION public.inc_forum_posts();
+CREATE TRIGGER inc_forum_threads_after_insert_on_threads AFTER INSERT ON public.threads FOR EACH ROW EXECUTE FUNCTION public.inc_forum_threads();
 CREATE TRIGGER insert_vote_after_insert_on_threads AFTER INSERT ON public.votes FOR EACH ROW EXECUTE FUNCTION public.insert_vote();
 CREATE TRIGGER update_vote_after_insert_on_threads AFTER UPDATE ON public.votes FOR EACH ROW EXECUTE FUNCTION public.update_vote();
 
@@ -237,16 +218,16 @@ ALTER TABLE ONLY public.forums_users_nicknames
 ALTER TABLE ONLY public.forums_users_nicknames
     ADD CONSTRAINT forums_users_nicknames_user_nickname_fkey FOREIGN KEY (user_nickname) REFERENCES public.users(nickname) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY public.posts
-    ADD CONSTRAINT posts_author_nickname_fkey FOREIGN KEY (author_nickname) REFERENCES public.users(nickname) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT posts_user_nickname_fkey FOREIGN KEY (user_nickname) REFERENCES public.users(nickname) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY public.posts
     ADD CONSTRAINT posts_forum_slug_fkey FOREIGN KEY (forum_slug) REFERENCES public.forums(slug) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY public.posts
     ADD CONSTRAINT posts_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.threads(id) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY public.threads
-    ADD CONSTRAINT threads_author_nickname_fkey FOREIGN KEY (author_nickname) REFERENCES public.users(nickname) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT threads_user_nickname_fkey FOREIGN KEY (user_nickname) REFERENCES public.users(nickname) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY public.threads
     ADD CONSTRAINT threads_forum_slug_fkey FOREIGN KEY (forum_slug) REFERENCES public.forums(slug) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY public.votes
-    ADD CONSTRAINT votes_author_nickname_fkey FOREIGN KEY (author_nickname) REFERENCES public.users(nickname) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT votes_user_nickname_fkey FOREIGN KEY (user_nickname) REFERENCES public.users(nickname) ON UPDATE CASCADE ON DELETE CASCADE;
 ALTER TABLE ONLY public.votes
     ADD CONSTRAINT votes_thread_id_fkey FOREIGN KEY (thread_id) REFERENCES public.threads(id) ON UPDATE CASCADE ON DELETE CASCADE;
