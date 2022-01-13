@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y software-properties-common gcc && \
+RUN apt-get update && apt-get install -y software-properties-common gcc vim && \
     add-apt-repository -y ppa:deadsnakes/ppa
 RUN apt-get update && apt-get install -y python3.9 python3.9-dev python3-distutils python3-pip python3-apt build-essential
 
