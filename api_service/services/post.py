@@ -155,7 +155,8 @@ class PostService:
         )
 
 
-def get_post_service(
-        db: PostgressDbEngine = Depends(get_postgres)
-) -> PostService:
-    return PostService(db)
+post_service: PostService = None
+
+
+def get_post_service() -> PostService:
+    return post_service

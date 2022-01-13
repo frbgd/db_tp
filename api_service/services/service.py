@@ -25,7 +25,8 @@ class ServiceService:
         await self.db.execute('TRUNCATE users, forums, threads, votes, posts, forums_users_nicknames')
 
 
-def get_service_service(
-        db: PostgressDbEngine = Depends(get_postgres)
-) -> ServiceService:
-    return ServiceService(db)
+service_service: ServiceService = None
+
+
+def get_service_service() -> ServiceService:
+    return service_service

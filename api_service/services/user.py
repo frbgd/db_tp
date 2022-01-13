@@ -112,7 +112,8 @@ class UserService:
         ), False
 
 
-def get_user_service(
-        db: PostgressDbEngine = Depends(get_postgres)
-) -> UserService:
-    return UserService(db)
+user_service: UserService = None
+
+
+def get_user_service() -> UserService:
+    return user_service

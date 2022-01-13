@@ -9,6 +9,11 @@ from core.config import dsl
 from core.logger import LOGGING
 from db import postgres
 from db.postgres import PostgressDbEngine
+from services.forum import ForumService
+from services.post import PostService
+from services.service import ServiceService
+from services.thread import ThreadService
+from services.user import UserService
 
 app = FastAPI(
     default_response_class=ORJSONResponse,
@@ -26,6 +31,11 @@ app.include_router(user.router, prefix='/api/user')
 async def startup_event():
     postgres.postgres_db_engine = PostgressDbEngine(**dsl)
     await postgres.postgres_db_engine.connect()
+    forum.forum_service = ForumService(postgres.postgres_db_engine)
+    post.post_service = PostService(postgres.postgres_db_engine)
+    service.service_service = ServiceService(postgres.postgres_db_engine)
+    thread.thread_service = ThreadService(postgres.postgres_db_engine)
+    user.user_service = UserService(postgres.postgres_db_engine)
 
 
 @app.on_event("shutdown")

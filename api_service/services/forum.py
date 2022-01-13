@@ -256,7 +256,8 @@ class ForumService:
         return item, False
 
 
-def get_forum_service(
-        db: PostgressDbEngine = Depends(get_postgres)
-) -> ForumService:
-    return ForumService(db)
+forum_service: ForumService = None
+
+
+def get_forum_service() -> ForumService:
+    return forum_service

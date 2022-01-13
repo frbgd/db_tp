@@ -415,7 +415,8 @@ class ThreadService:
         ]
 
 
-def get_thread_service(
-        db: PostgressDbEngine = Depends(get_postgres)
-) -> ThreadService:
-    return ThreadService(db)
+thread_service: ThreadService = None
+
+
+def get_thread_service() -> ThreadService:
+    return thread_service
