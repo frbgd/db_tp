@@ -118,8 +118,8 @@ func NewForumService(db *db.PostgresDbEngine) *ForumService {
 	return srv
 }
 
-func (forum *ForumService) GetBySlug(slug string) *models.Forum {
-	rows, _ := forum.db.CP.Query(
+func (forumSrv *ForumService) GetBySlug(slug string) *models.Forum {
+	rows, _ := forumSrv.db.CP.Query(
 		context.Background(),
 		`SELECT slug, title, threads, posts, owner_nickname 
 FROM forums 
@@ -136,21 +136,21 @@ WHERE slug = $1`,
 	}
 }
 
-func (forum *ForumService) GetThreadBySlug(slug string) (*models.Thread, error) {
+func (forumSrv *ForumService) GetThreadBySlug(slug string) (*models.Thread, error) {
 
 }
 
-func (forum *ForumService) GetForumUsers(slug string, desc bool, limit int, since string) []models.User {
+func (forumSrv *ForumService) GetForumUsers(slug string, desc bool, limit int, since string) []models.User {
 	var rows pgx.Rows
 	if since != "" {
-		rows, _ = forum.db.CP.Query(context.Background(),
+		rows, _ = forumSrv.db.CP.Query(context.Background(),
 			sqlGetForumUserWithSince[desc],
 			slug,
 			since,
 			limit,
 		)
 	} else {
-		rows, _ = forum.db.CP.Query(context.Background(),
+		rows, _ = forumSrv.db.CP.Query(context.Background(),
 			sqlGetForumUser[desc],
 			slug,
 			limit,
@@ -168,7 +168,7 @@ func (forum *ForumService) GetForumUsers(slug string, desc bool, limit int, sinc
 	}
 
 	if !foundUsers {
-		forumObj := forum.GetBySlug(slug)
+		forumObj := forumSrv.GetBySlug(slug)
 		if forumObj == nil {
 			return nil
 		}
@@ -177,17 +177,17 @@ func (forum *ForumService) GetForumUsers(slug string, desc bool, limit int, sinc
 	return users
 }
 
-func (forum *ForumService) GetForumThreads(slug string, desc bool, limit int, since *time.Time) []models.Thread {
+func (forumSrv *ForumService) GetForumThreads(slug string, desc bool, limit int, since *time.Time) []models.Thread {
 	var rows pgx.Rows
 	if since != nil {
-		rows, _ = forum.db.CP.Query(context.Background(),
+		rows, _ = forumSrv.db.CP.Query(context.Background(),
 			sqlGetThreadsByForumSlugSince[desc],
 			slug,
 			since,
 			limit,
 		)
 	} else {
-		rows, _ = forum.db.CP.Query(context.Background(),
+		rows, _ = forumSrv.db.CP.Query(context.Background(),
 			sqlGetThreadsByForumSlug[desc],
 			slug,
 			limit,
@@ -212,7 +212,7 @@ func (forum *ForumService) GetForumThreads(slug string, desc bool, limit int, si
 	}
 
 	if !foundThreads {
-		forumObj := forum.GetBySlug(slug)
+		forumObj := forumSrv.GetBySlug(slug)
 		if forumObj == nil {
 			return nil
 		}
@@ -221,10 +221,10 @@ func (forum *ForumService) GetForumThreads(slug string, desc bool, limit int, si
 	return threads
 }
 
-func (forum *ForumService) CreateForum(item *models.Forum) (*models.Forum, error) {
+func (forumSrv *ForumService) CreateForum(item *models.Forum) (*models.Forum, error) {
 
 }
 
-func (forum *ForumService) CreateThread(item *models.Thread) (*models.Thread, error) {
+func (forumSrv *ForumService) CreateThread(item *models.Thread) (*models.Thread, error) {
 
 }

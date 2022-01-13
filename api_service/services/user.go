@@ -17,22 +17,22 @@ func NewUserService(db *db.PostgresDbEngine) *UserService {
 	return srv
 }
 
-func (forum *UserService) GetUsersByNicknameOrEmail(nickname string, email string) (*models.User[], error) {
+func (userSrv *UserService) GetUsersByNicknameOrEmail(nickname string, email string) (*models.User[], error) {
 
 }
 
-func (forum *UserService) CreateUser(item *models.User) (*models.User, error) {
+func (userSrv *UserService) CreateUser(item *models.User) (*models.User, error) {
 
 }
 
-func (forum *UserService) GetByEmail(email string) (*models.User, error) {
+func (userSrv *UserService) GetByEmail(email string) (*models.User, error) {
 
 }
 
-func (forum *UserService) GetByNickname(nickname string) *models.User {
+func (userSrv *UserService) GetByNickname(nickname string) *models.User {
 
 }
 
-func (forum *UserService) UpdateByNickname(nickname string, item *models.UserUpdate) (*models.User, error) {
+func (userSrv *UserService) UpdateByNickname(nickname string, item *models.UserUpdate) (*models.User, error) {
 
 }

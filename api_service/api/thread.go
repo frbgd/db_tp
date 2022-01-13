@@ -39,19 +39,19 @@ func EditThread(ctx *fasthttp.RequestCtx) {
 
 func GetThreadPosts(ctx *fasthttp.RequestCtx) {
 	slugOrId := ctx.UserValue("slug_or_id").(string)
-	limit := string(ctx.QueryArgs().Peek("limit"))
-	since := string(ctx.QueryArgs().Peek("since"))
-	desc := string(ctx.QueryArgs().Peek("desc"))
+	limit, _ := strconv.Atoi(string(ctx.QueryArgs().Peek("limit")))
+	since, _ := strconv.Atoi(string(ctx.QueryArgs().Peek("since")))
+	desc, _ := strconv.ParseBool(string(ctx.QueryArgs().Peek("desc")))
 	sort := string(ctx.QueryArgs().Peek("sort"))
 
 	var thread *models.Thread
 	id, err := strconv.Atoi(slugOrId)
 	if err == nil {
 		thread = services.ThreadSrv.GetById(id)
-	} else {
+	}
+	if thread == nil {
 		thread = services.ThreadSrv.GetBySlug(slugOrId)
 	}
-
 	if thread == nil {
 		errMsg := models.ErrMsg{Message: fmt.Sprintf("Can't find posts for thread with slug or id:  %s", slugOrId)}
 		response, _ := easyjson.Marshal(errMsg)
@@ -61,7 +61,7 @@ func GetThreadPosts(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	posts := services.ThreadSrv.GetPosts(thread.Id, desc, limit, since, sort)
+	posts := services.ThreadSrv.GetPosts(thread.Id, desc, limit, &since, sort)
 	resp, _ := easyjson.Marshal(posts)
 	ctx.Response.SetBody(resp)
 	ctx.SetContentType("application/json")

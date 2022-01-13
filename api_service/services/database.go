@@ -17,10 +17,10 @@ func NewDatabaseService(db *db.PostgresDbEngine) *DatabaseService {
 	return srv
 }
 
-func (forum *DatabaseService) GetStatus() *models.Status {
+func (databaseSrv *DatabaseService) GetStatus() *models.Status {
 
 }
 
-func (forum *DatabaseService) ClearDatabase() error {
+func (databaseSrv *DatabaseService) ClearDatabase() error {
 
 }

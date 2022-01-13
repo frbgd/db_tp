@@ -18,8 +18,8 @@ func NewPostService(db *db.PostgresDbEngine) *PostService {
 	return srv
 }
 
-func (forum *PostService) GetById(id int) *models.FullPost {
-	rows, _ := forum.db.CP.Query(
+func (postSrv *PostService) GetById(id int) *models.FullPost {
+	rows, _ := postSrv.db.CP.Query(
 		context.Background(),
 		`SELECT id,
 				   thread_id,
@@ -39,25 +39,25 @@ func (forum *PostService) GetById(id int) *models.FullPost {
 	} else {
 		fullPost := new(models.FullPost)
 
-		var post models.Post
-		rows.Scan(&post.Thread,
-			&post.Author,
-			&post.Forum,
-			&post.IsEdited,
-			&post.Message,
-			&post.Parent,
-			&post.Created,
+		var postObj models.Post
+		rows.Scan(&postObj.Thread,
+			&postObj.Author,
+			&postObj.Forum,
+			&postObj.IsEdited,
+			&postObj.Message,
+			&postObj.Parent,
+			&postObj.Created,
 		)
 
-		fullPost.Post = post
-		fullPost.Author = *UserSrv.GetByNickname(post.Author)
-		fullPost.Forum = *ForumSrv.GetBySlug(post.Forum)
-		fullPost.Thread = *ThreadSrv.GetById(post.Thread)
+		fullPost.Post = postObj
+		fullPost.Author = *UserSrv.GetByNickname(postObj.Author)
+		fullPost.Forum = *ForumSrv.GetBySlug(postObj.Forum)
+		fullPost.Thread = *ThreadSrv.GetById(postObj.Thread)
 
 		return fullPost
 	}
 }
 
-func (forum *PostService) UpdateById(id int64) (*models.PostUpdate, error) {
+func (postSrv *PostService) UpdateById(id int64) (*models.PostUpdate, error) {
 
 }
