@@ -27,7 +27,8 @@ RUN service postgresql start && \
     service postgresql stop
 
 RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PGVER/main/pg_hba.conf && \
-    echo "listen_addresses='*'" >> /etc/postgresql/$PGVER/main/postgresql.conf
+    echo "listen_addresses='*'" >> /etc/postgresql/$PGVER/main/postgresql.conf && \
+    cat /db/postgresql.conf >> /etc/postgresql/$PGVER/main/conf.d/custom_postgresql.conf
 
 USER root
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
