@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/mailru/easyjson"
 	"github.com/valyala/fasthttp"
+	"strconv"
+	"time"
 )
 
 func CreateForum(ctx *fasthttp.RequestCtx) {
@@ -38,8 +40,8 @@ func CreateThread(ctx *fasthttp.RequestCtx) {
 
 func GetForumUsers(ctx *fasthttp.RequestCtx) {
 	slug := ctx.UserValue("slug").(string)
-	desc := string(ctx.QueryArgs().Peek("desc"))
-	limit := string(ctx.QueryArgs().Peek("limit"))
+	desc, _ := strconv.ParseBool(string(ctx.QueryArgs().Peek("desc")))
+	limit, _ := strconv.Atoi(string(ctx.QueryArgs().Peek("limit")))
 	since := string(ctx.QueryArgs().Peek("since"))
 
 	users := services.ForumSrv.GetForumUsers(slug, desc, limit, since)
@@ -61,11 +63,18 @@ func GetForumUsers(ctx *fasthttp.RequestCtx) {
 
 func GetForumThreads(ctx *fasthttp.RequestCtx) {
 	slug := ctx.UserValue("slug").(string)
-	desc := string(ctx.QueryArgs().Peek("desc"))
-	limit := string(ctx.QueryArgs().Peek("limit"))
-	since := string(ctx.QueryArgs().Peek("since"))
+	desc, _ := strconv.ParseBool(string(ctx.QueryArgs().Peek("desc")))
+	limit, _ := strconv.Atoi(string(ctx.QueryArgs().Peek("limit")))
 
-	threads := services.ForumSrv.GetForumThreads(slug, desc, limit, since)
+	var threads []models.Thread
+
+	since := string(ctx.QueryArgs().Peek("since"))
+	if since != "" {
+		sinceTime, _ := time.Parse(time.RFC3339, since)
+		threads = services.ForumSrv.GetForumThreads(slug, desc, limit, &sinceTime)
+	} else {
+		threads = services.ForumSrv.GetForumThreads(slug, desc, limit, nil)
+	}
 
 	if threads == nil {
 		errMsg := models.ErrMsg{Message: fmt.Sprintf("Can't find threads for forum with slug:  %s", slug)}

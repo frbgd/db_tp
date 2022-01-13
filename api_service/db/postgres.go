@@ -9,8 +9,8 @@ import (
 var PgEngine *PostgresDbEngine
 
 type PostgresDbEngine struct {
-	connStr        string
-	connectionPool *pgxpool.Pool
+	connStr string
+	CP      *pgxpool.Pool
 }
 
 func NewPostgresDbEngine(user string, password string, database string) (*PostgresDbEngine, error) {
@@ -24,7 +24,7 @@ func NewPostgresDbEngine(user string, password string, database string) (*Postgr
 	if err != nil {
 		return nil, err
 	}
-	p.connectionPool, err = pgxpool.ConnectConfig(context.Background(), config)
+	p.CP, err = pgxpool.ConnectConfig(context.Background(), config)
 	if err != nil {
 		return nil, err
 	}
@@ -33,5 +33,5 @@ func NewPostgresDbEngine(user string, password string, database string) (*Postgr
 }
 
 func (engine *PostgresDbEngine) Close() {
-	engine.connectionPool.Close()
+	engine.CP.Close()
 }
