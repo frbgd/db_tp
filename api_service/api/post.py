@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 
 from api.exceptions import HttpNotFoundException
-from models.post import Post, FullPost, PostUpdate
-from services.post import PostService, get_post_service
+from models.post import FullPost, PostUpdate
+from services.post import post_service
 
 router = APIRouter()
 
@@ -11,7 +11,6 @@ router = APIRouter()
 async def get_post_details(
         id: int,
         related: str = None,
-        post_service: PostService = Depends(get_post_service)
 ) -> FullPost:
     # TODO related поле
     post = await post_service.get_by_id(id)
@@ -37,8 +36,7 @@ async def get_post_details(
 @router.post('/{id}/details')
 async def edit_post(
         id: int,
-        item: PostUpdate,
-        post_service: PostService = Depends(get_post_service)
+        item: PostUpdate
 ):
     # TODO валидация
     post = await post_service.update_by_id(id, item)

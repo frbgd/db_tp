@@ -1,11 +1,11 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from starlette.responses import JSONResponse
 
 from api.exceptions import HttpNotFoundException, HttpConflictException
 from models.user import User, UserUpdate
-from services.user import UserService, get_user_service
+from services.user import user_service
 
 router = APIRouter()
 
@@ -14,7 +14,6 @@ router = APIRouter()
 async def create_user(
         nickname: str,
         item: User,
-        user_service: UserService = Depends(get_user_service)
 ):
     # TODO валидация
     item.nickname = nickname
@@ -40,7 +39,6 @@ async def create_user(
 @router.get('/{nickname}/profile')
 async def get_user_details(
         nickname: str,
-        user_service: UserService = Depends(get_user_service)
 ) -> User:
     user = await user_service.get_by_nickname(nickname)
 
@@ -55,7 +53,6 @@ async def get_user_details(
 async def edit_user_details(
         nickname: str,
         item: UserUpdate,
-        user_service: UserService = Depends(get_user_service)
 ) -> User:
     # TODO валидация
     user, not_unique = await user_service.update_by_nickname(nickname, item)

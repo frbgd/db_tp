@@ -3,13 +3,13 @@ from typing import List
 
 from fastapi import APIRouter, Depends
 
-from api.dependency import filter_parameters, filter_posts_parameters
+from api.dependency import filter_posts_parameters
 from api.exceptions import HttpNotFoundException, HttpConflictException
 from db.postgres import foreign_key_violation_exception
 from models.post import Post
 from models.thread import Thread, ThreadUpdate
 from models.vote import Vote
-from services.thread import ThreadService, get_thread_service
+from services.thread import thread_service
 
 router = APIRouter()
 
@@ -17,8 +17,7 @@ router = APIRouter()
 @router.post('/{slug_or_id}/create', status_code=201)
 async def create_post(
         slug_or_id: str,
-        item: List[Post],
-        thread_service: ThreadService = Depends(get_thread_service)
+        item: List[Post]
 ) -> List[Post]:
     thread = await thread_service.get_by_slug_or_id(slug_or_id)
     if not thread:
@@ -47,8 +46,7 @@ async def create_post(
 
 @router.get('/{slug_or_id}/details')
 async def get_thread_details(
-        slug_or_id: str,
-        thread_service: ThreadService = Depends(get_thread_service)
+        slug_or_id: str
 ) -> Thread:
     thread = await thread_service.get_by_slug_or_id(slug_or_id)
 
@@ -62,8 +60,7 @@ async def get_thread_details(
 @router.post('/{slug_or_id}/details')
 async def edit_thread(
         slug_or_id: str,
-        item: ThreadUpdate,
-        thread_service: ThreadService = Depends(get_thread_service)
+        item: ThreadUpdate
 ) -> Thread:
     # TODO валидация
     thread = await thread_service.update_by_slug_or_id(slug_or_id, item)
@@ -79,8 +76,7 @@ async def edit_thread(
 async def get_thread_posts(
         slug_or_id: str,
         filter_params: dict = Depends(filter_posts_parameters),
-        sort: str = 'flat',
-        thread_service: ThreadService = Depends(get_thread_service)
+        sort: str = 'flat'
 ) -> List[Post]:
     # TODO валидация sort
     thread = None
@@ -103,8 +99,7 @@ async def get_thread_posts(
 @router.post('/{slug_or_id}/vote')
 async def vote_for_thread(
         slug_or_id: str,
-        item: Vote,
-        thread_service: ThreadService = Depends(get_thread_service)
+        item: Vote
 ) -> Thread:
     # TODO валидация (-1, 1)
     if slug_or_id.isdigit():

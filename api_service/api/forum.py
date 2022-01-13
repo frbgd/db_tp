@@ -8,7 +8,7 @@ from api.exceptions import HttpNotFoundException
 from models.forum import Forum
 from models.thread import Thread
 from models.user import User
-from services.forum import ForumService, get_forum_service
+from services.forum import forum_service
 
 router = APIRouter()
 
@@ -16,8 +16,7 @@ router = APIRouter()
 @router.post('/create', status_code=201)
 async def create_forum(
         item: Forum,
-        response: Response,
-        forum_service: ForumService = Depends(get_forum_service)
+        response: Response
 ):
     # TODO валидировать входные данные форума (числа, slug)
     forum, not_unique = await forum_service.create_forum(item)
@@ -34,8 +33,7 @@ async def create_forum(
 
 @router.get('/{slug}/details')
 async def get_forum_details(
-        slug: str,
-        forum_service: ForumService = Depends(get_forum_service)
+        slug: str
 ) -> Forum:
     forum = await forum_service.get_by_slug(slug)
 
@@ -51,8 +49,7 @@ async def get_forum_details(
 async def create_thread(
         slug: str,
         item: Thread,
-        response: Response,
-        forum_service: ForumService = Depends(get_forum_service)
+        response: Response
 ):
     # TODO валидировать входные данные топика (slug, created)
     # TODO возможно надо title переводить в slug
@@ -74,8 +71,7 @@ async def create_thread(
 @router.get('/{slug}/users')
 async def get_forum_users(
         slug: str,
-        filter_params: dict = Depends(filter_users_parameters),
-        forum_service: ForumService = Depends(get_forum_service)
+        filter_params: dict = Depends(filter_users_parameters)
 ) -> List[User]:
     users = await forum_service.get_forum_users(
         slug=slug,
@@ -94,8 +90,7 @@ async def get_forum_users(
 @router.get('/{slug}/threads')
 async def get_forum_threads(
         slug: str,
-        filter_params: dict = Depends(filter_parameters),
-        forum_service: ForumService = Depends(get_forum_service)
+        filter_params: dict = Depends(filter_parameters)
 ) -> List[Thread]:
     threads = await forum_service.get_forum_threads(
         slug=slug,
