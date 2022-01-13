@@ -136,9 +136,9 @@ WHERE slug = $1`,
 	}
 }
 
-func (forumSrv *ForumService) GetThreadBySlug(slug string) (*models.Thread, error) {
-
-}
+//func (forumSrv *ForumService) GetThreadBySlug(slug string) (*models.Thread, error) {
+//
+//}
 
 func (forumSrv *ForumService) GetForumUsers(slug string, desc bool, limit int, since string) []models.User {
 	var rows pgx.Rows
@@ -221,10 +221,10 @@ func (forumSrv *ForumService) GetForumThreads(slug string, desc bool, limit int,
 	return threads
 }
 
-func (forumSrv *ForumService) CreateForum(item *models.Forum) (*models.Forum, error) {
-
-}
-
-func (forumSrv *ForumService) CreateThread(item *models.Thread) (*models.Thread, error) {
-
-}
+//func (forumSrv *ForumService) CreateForum(item *models.Forum) (*models.Forum, error) {
+//
+//}
+//
+//func (forumSrv *ForumService) CreateThread(item *models.Thread) (*models.Thread, error) {
+//
+//}

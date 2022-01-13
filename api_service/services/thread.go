@@ -293,25 +293,25 @@ func (threadSrv *ThreadService) GetById(id int) *models.Thread {
 	}
 }
 
-func (threadSrv *ThreadService) CreatePosts(posts *models.Post[]) (*models.Post, error) {
+//func (threadSrv *ThreadService) CreatePosts(posts *models.Post[]) (*models.Post, error) {
+//
+//}
 
-}
+//func (threadSrv *ThreadService) UpdateBySlugOrId(slugOrId string, item *models.ThreadUpdate) (*models.Thread, error) {
+//
+//}
+//
+//func (threadSrv *ThreadService) UpdateBySlug(slug string, item *models.ThreadUpdate) (*models.Thread, error) {
+//
+//}
+//
+//func (threadSrv *ThreadService) UpdateById(id int64, item *models.ThreadUpdate) (*models.Thread, error) {
+//
+//}
 
-func (threadSrv *ThreadService) UpdateBySlugOrId(slugOrId string, item *models.ThreadUpdate) (*models.Thread, error) {
-
-}
-
-func (threadSrv *ThreadService) UpdateBySlug(slug string, item *models.ThreadUpdate) (*models.Thread, error) {
-
-}
-
-func (threadSrv *ThreadService) UpdateById(id int64, item *models.ThreadUpdate) (*models.Thread, error) {
-
-}
-
-func (threadSrv *ThreadService) VoteById(id int64, item *models.Vote) error {
-
-}
+//func (threadSrv *ThreadService) VoteById(id int64, item *models.Vote) error {
+//
+//}
 
 func (threadSrv *ThreadService) GetPosts(threadId int, desc bool, limit int, since *int, sort string) []models.Post {
 	var rows pgx.Rows

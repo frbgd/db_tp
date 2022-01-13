@@ -8,9 +8,9 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func CreateUser(ctx *fasthttp.RequestCtx) {
-
-}
+//func CreateUser(ctx *fasthttp.RequestCtx) {
+//
+//}
 
 func GetUserDetails(ctx *fasthttp.RequestCtx) {
 	nickname := ctx.UserValue("nickname").(string)
@@ -32,6 +32,6 @@ func GetUserDetails(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetStatusCode(200)
 }
 
-func EditUser(ctx *fasthttp.RequestCtx) {
-
-}
+//func EditUser(ctx *fasthttp.RequestCtx) {
+//
+//}

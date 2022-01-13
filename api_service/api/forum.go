@@ -34,9 +34,9 @@ func GetForumDetails(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetStatusCode(200)
 }
 
-func CreateThread(ctx *fasthttp.RequestCtx) {
-
-}
+//func CreateThread(ctx *fasthttp.RequestCtx) {
+//
+//}
 
 func GetForumUsers(ctx *fasthttp.RequestCtx) {
 	slug := ctx.UserValue("slug").(string)

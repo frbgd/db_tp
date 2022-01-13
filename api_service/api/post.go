@@ -43,6 +43,6 @@ func GetPostDetails(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetStatusCode(200)
 }
 
-func EditPost(ctx *fasthttp.RequestCtx) {
-
-}
+//func EditPost(ctx *fasthttp.RequestCtx) {
+//
+//}

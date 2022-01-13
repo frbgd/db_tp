@@ -9,9 +9,9 @@ import (
 	"strconv"
 )
 
-func CreatePost(ctx *fasthttp.RequestCtx) {
-
-}
+//func CreatePost(ctx *fasthttp.RequestCtx) {
+//
+//}
 
 func GetThreadDetails(ctx *fasthttp.RequestCtx) {
 	slugOrId := ctx.UserValue("slug_or_id").(string)
@@ -33,9 +33,9 @@ func GetThreadDetails(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetStatusCode(200)
 }
 
-func EditThread(ctx *fasthttp.RequestCtx) {
-
-}
+//func EditThread(ctx *fasthttp.RequestCtx) {
+//
+//}
 
 func GetThreadPosts(ctx *fasthttp.RequestCtx) {
 	slugOrId := ctx.UserValue("slug_or_id").(string)
@@ -68,6 +68,6 @@ func GetThreadPosts(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetStatusCode(200)
 }
 
-func VoteForThread(ctx *fasthttp.RequestCtx) {
-
-}
+//func VoteForThread(ctx *fasthttp.RequestCtx) {
+//
+//}
