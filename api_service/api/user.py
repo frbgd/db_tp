@@ -29,10 +29,7 @@ async def create_user(
             } for user in users
         ])
         response.status_code = HTTPStatus.CONFLICT
-        await user_service.db.close()  # FIXME говнокод
         return response
-
-    await user_service.db.close()  # FIXME говнокод
     return users[0]
 
 
@@ -41,8 +38,6 @@ async def get_user_details(
         nickname: str,
 ) -> User:
     user = await user_service.get_by_nickname(nickname)
-
-    await user_service.db.close()  # FIXME говнокод
     if not user:
         raise HttpNotFoundException()
 
@@ -56,8 +51,6 @@ async def edit_user_details(
 ) -> User:
     # TODO валидация
     user, not_unique = await user_service.update_by_nickname(nickname, item)
-
-    await user_service.db.close()  # FIXME говнокод
     if not_unique:
         raise HttpConflictException()
     if not user:

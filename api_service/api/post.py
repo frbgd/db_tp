@@ -15,8 +15,6 @@ async def get_post_details(
     # TODO related поле
     post = await post_service.get_by_id(id)
 
-    await post_service.db.close()  # FIXME говнокод
-
     if not post:
         raise HttpNotFoundException()
 
@@ -40,8 +38,6 @@ async def edit_post(
 ):
     # TODO валидация
     post = await post_service.update_by_id(id, item)
-
-    await post_service.db.close()  # FIXME говнокод
 
     if not post:
         raise HttpNotFoundException()

@@ -12,8 +12,6 @@ async def clear_database(
 ):
     await service_service.clear_database()
 
-    await service_service.db.close()  # FIXME говнокод
-
     return Response()
 
 
@@ -21,5 +19,4 @@ async def clear_database(
 async def get_database_status(
 ) -> Status:
     status = await service_service.get_status()
-    await service_service.db.close()  # FIXME говнокод
     return status

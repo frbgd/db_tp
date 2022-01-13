@@ -21,8 +21,6 @@ async def create_forum(
     # TODO валидировать входные данные форума (числа, slug)
     forum, not_unique = await forum_service.create_forum(item)
 
-    await forum_service.db.close()  # FIXME говнокод
-
     if not forum:
         raise HttpNotFoundException()
     if not_unique:
@@ -36,8 +34,6 @@ async def get_forum_details(
         slug: str
 ) -> Forum:
     forum = await forum_service.get_by_slug(slug)
-
-    await forum_service.db.close()  # FIXME говнокод
 
     if not forum:
         raise HttpNotFoundException()
@@ -56,8 +52,6 @@ async def create_thread(
     if not item.forum:
         item.forum = slug
     thread, not_unique = await forum_service.create_thread(item)
-
-    await forum_service.db.close()  # FIXME говнокод
 
     if not thread:
         raise HttpNotFoundException()
@@ -78,8 +72,6 @@ async def get_forum_users(
         filter_params=filter_params
     )
 
-    await forum_service.db.close()  # FIXME говнокод
-
     if not isinstance(users, list):
         raise HttpNotFoundException()
 
@@ -96,8 +88,6 @@ async def get_forum_threads(
         slug=slug,
         filter_params=filter_params
     )
-
-    await forum_service.db.close()  # FIXME говнокод
 
     if not isinstance(threads, list):
         raise HttpNotFoundException()
