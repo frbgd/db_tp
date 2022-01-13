@@ -3,6 +3,7 @@ package api_service
 import (
 	"db_tp/api"
 	"db_tp/db"
+	"db_tp/services"
 	"github.com/fasthttp/router"
 	"github.com/valyala/fasthttp"
 	"log"
@@ -22,6 +23,12 @@ func main() {
 		return
 	}
 	defer db.PgEngine.Close()
+
+	services.DatabaseSrv = services.NewDatabaseService(db.PgEngine)
+	services.ForumSrv = services.NewForumService(db.PgEngine)
+	services.PostSrv = services.NewPostService(db.PgEngine)
+	services.ThreadSrv = services.NewThreadService(db.PgEngine)
+	services.UserSrv = services.NewUserService(db.PgEngine)
 
 	r := router.New()
 

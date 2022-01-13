@@ -5,10 +5,16 @@ import (
 	"db_tp/models"
 )
 
-var UserSrv UserService
+var UserSrv *UserService
 
 type UserService struct {
 	db *db.PostgresDbEngine
+}
+
+func NewUserService(db *db.PostgresDbEngine) *UserService {
+	srv := new(UserService)
+	srv.db = db
+	return srv
 }
 
 func (forum *UserService) GetUsersByNicknameOrEmail(nickname string, email string) (*models.User[], error) {

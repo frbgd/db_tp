@@ -5,10 +5,16 @@ import (
 	"db_tp/models"
 )
 
-var PostSrv PostService
+var PostSrv *PostService
 
 type PostService struct {
 	db *db.PostgresDbEngine
+}
+
+func NewPostService(db *db.PostgresDbEngine) *PostService {
+	srv := new(PostService)
+	srv.db = db
+	return srv
 }
 
 func (forum *PostService) GetUserByNickname(nickname string) (*models.User, error) {

@@ -5,10 +5,16 @@ import (
 	"db_tp/models"
 )
 
-var ForumSrv ForumService
+var ForumSrv *ForumService
 
 type ForumService struct {
 	db *db.PostgresDbEngine
+}
+
+func NewForumService(db *db.PostgresDbEngine) *ForumService {
+	srv := new(ForumService)
+	srv.db = db
+	return srv
 }
 
 func (forum *ForumService) GetBySlug(slug string) (*models.Forum, error) {

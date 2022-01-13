@@ -5,10 +5,16 @@ import (
 	"db_tp/models"
 )
 
-var ThreadeSrv ThreadService
+var ThreadSrv *ThreadService
 
 type ThreadService struct {
 	db *db.PostgresDbEngine
+}
+
+func NewThreadService(db *db.PostgresDbEngine) *ThreadService {
+	srv := new(ThreadService)
+	srv.db = db
+	return srv
 }
 
 func (forum *ThreadService) GetBySlugOrId(slugOrId string) (*models.Thread, error) {
