@@ -41,4 +41,4 @@ ENV DBNAME postgres
 ENV DBUSER postgres
 ENV PGPASSWORD mysecretpassword
 
-CMD service postgresql start && ./app
+CMD service postgresql start && /usr/local/go/bin/go build main.go && ./main
