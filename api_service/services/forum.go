@@ -246,10 +246,10 @@ func (forumSrv *ForumService) GetForumThreads(slug string, desc bool, limit int,
 	return threads
 }
 
-//func (forumSrv *ForumService) CreateForum(item *models.Forum) (*models.Forum, error) {
-//
-//}
-//
-//func (forumSrv *ForumService) CreateThread(item *models.Thread) (*models.Thread, error) {
-//
-//}
+func (forumSrv *ForumService) CreateForum(item *models.Forum) (*models.Forum, bool) {
+
+}
+
+func (forumSrv *ForumService) CreateThread(item *models.Thread) (*models.Thread, bool) {
+
+}

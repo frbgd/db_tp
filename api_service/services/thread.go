@@ -310,14 +310,14 @@ func (threadSrv *ThreadService) GetById(id int) *models.Thread {
 	}
 }
 
-//func (threadSrv *ThreadService) CreatePosts(posts *models.Post[]) (*models.Post, error) {
-//
-//}
+func (threadSrv *ThreadService) CreatePosts(posts *models.Posts) (*models.Posts, bool) {
 
-//func (threadSrv *ThreadService) UpdateBySlugOrId(slugOrId string, item *models.ThreadUpdate) (*models.Thread, error) {
-//
-//}
-//
+}
+
+func (threadSrv *ThreadService) UpdateBySlugOrId(slugOrId string, item *models.ThreadUpdate) *models.Thread {
+
+}
+
 //func (threadSrv *ThreadService) UpdateBySlug(slug string, item *models.ThreadUpdate) (*models.Thread, error) {
 //
 //}

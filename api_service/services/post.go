@@ -70,6 +70,6 @@ func (postSrv *PostService) GetById(id int) *models.FullPost {
 	}
 }
 
-//func (postSrv *PostService) UpdateById(id int64) (*models.PostUpdate, error) {
-//
-//}
+func (postSrv *PostService) UpdateById(id int, item *models.PostUpdate) *models.Post {
+
+}

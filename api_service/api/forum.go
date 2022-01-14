@@ -11,7 +11,31 @@ import (
 )
 
 func CreateForum(ctx *fasthttp.RequestCtx) {
+	item := &models.Forum{}
+	easyjson.Unmarshal(ctx.PostBody(), item)
 
+	forum, notUnique := services.ForumSrv.CreateForum(item)
+	if forum == nil {
+		errMsg := models.ErrMsg{Message: fmt.Sprintf("Can't find user with nickname:  %s", item.User)}
+		response, _ := easyjson.Marshal(errMsg)
+		ctx.SetBody(response)
+		ctx.SetStatusCode(404)
+		ctx.SetContentType("application/json")
+		return
+	}
+	if notUnique {
+		errMsg := models.ErrMsg{Message: fmt.Sprintf("Not unique fields")}
+		response, _ := easyjson.Marshal(errMsg)
+		ctx.SetBody(response)
+		ctx.SetStatusCode(409)
+		ctx.SetContentType("application/json")
+		return
+	}
+
+	resp, _ := easyjson.Marshal(forum)
+	ctx.Response.SetBody(resp)
+	ctx.SetContentType("application/json")
+	ctx.Response.SetStatusCode(201)
 }
 
 func GetForumDetails(ctx *fasthttp.RequestCtx) {
@@ -34,9 +58,37 @@ func GetForumDetails(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetStatusCode(200)
 }
 
-//func CreateThread(ctx *fasthttp.RequestCtx) {
-//
-//}
+func CreateThread(ctx *fasthttp.RequestCtx) {
+	slug := ctx.UserValue("slug").(string)
+	item := &models.Thread{}
+	easyjson.Unmarshal(ctx.PostBody(), item)
+	if item.Forum == "" {
+		item.Forum = slug
+	}
+
+	thread, notUnique := services.ForumSrv.CreateThread(item)
+	if thread == nil {
+		errMsg := models.ErrMsg{Message: fmt.Sprintf("Can't find")}
+		response, _ := easyjson.Marshal(errMsg)
+		ctx.SetBody(response)
+		ctx.SetStatusCode(404)
+		ctx.SetContentType("application/json")
+		return
+	}
+	if notUnique {
+		errMsg := models.ErrMsg{Message: fmt.Sprintf("Not unique fields")}
+		response, _ := easyjson.Marshal(errMsg)
+		ctx.SetBody(response)
+		ctx.SetStatusCode(409)
+		ctx.SetContentType("application/json")
+		return
+	}
+
+	resp, _ := easyjson.Marshal(thread)
+	ctx.Response.SetBody(resp)
+	ctx.SetContentType("application/json")
+	ctx.Response.SetStatusCode(201)
+}
 
 func GetForumUsers(ctx *fasthttp.RequestCtx) {
 	slug := ctx.UserValue("slug").(string)

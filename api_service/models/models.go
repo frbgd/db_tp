@@ -40,6 +40,11 @@ type FullPost struct {
 }
 
 //easyjson:json
+type PostUpdate struct {
+	Message string `json:"message,omitempty"`
+}
+
+//easyjson:json
 type Status struct {
 	Forum  int `json:"forum,omitempty"`
 	Post   int `json:"post,omitempty"`
@@ -63,6 +68,12 @@ type Thread struct {
 type Threads []Thread
 
 //easyjson:json
+type ThreadUpdate struct {
+	Title   string `json:"title,omitempty"`
+	Message string `json:"message,omitempty"`
+}
+
+//easyjson:json
 type User struct {
 	Email    string `json:"email,omitempty"`
 	Fullname string `json:"fullname,omitempty"`
@@ -72,3 +83,10 @@ type User struct {
 
 //easyjson:json
 type Users []User
+
+//easyjson:json
+type UserUpdate struct {
+	Email    string `json:"email,omitempty"`
+	Fullname string `json:"fullname,omitempty"`
+	About    string `json:"about,omitempty"`
+}

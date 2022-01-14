@@ -7,11 +7,64 @@ import (
 	"github.com/mailru/easyjson"
 	"github.com/valyala/fasthttp"
 	"strconv"
+	"time"
 )
 
-//func CreatePost(ctx *fasthttp.RequestCtx) {
-//
-//}
+func CreatePost(ctx *fasthttp.RequestCtx) {
+	slugOrId := ctx.UserValue("slug_or_id").(string)
+
+	thread := services.ThreadSrv.GetBySlugOrId(slugOrId)
+
+	if thread == nil {
+		errMsg := models.ErrMsg{Message: fmt.Sprintf("Can't find thread with slug or id:  %s", slugOrId)}
+		response, _ := easyjson.Marshal(errMsg)
+		ctx.SetBody(response)
+		ctx.SetStatusCode(404)
+		ctx.SetContentType("application/json")
+		return
+	}
+
+	items := &models.Posts{}
+	easyjson.Unmarshal(ctx.PostBody(), items)
+
+	if items != nil && len(*items) == 0 {
+		resp, _ := easyjson.Marshal(items)
+		ctx.Response.SetBody(resp)
+		ctx.SetContentType("application/json")
+		ctx.Response.SetStatusCode(200)
+		return
+	}
+
+	now := time.Now()
+	for _, item := range *items {
+		item.Created = now
+		item.Thread = thread.Id
+		item.Forum = thread.Forum
+	}
+
+	posts, invalidParents := services.ThreadSrv.CreatePosts(items)
+	if invalidParents {
+		errMsg := models.ErrMsg{Message: fmt.Sprintf("Invalid parents")}
+		response, _ := easyjson.Marshal(errMsg)
+		ctx.SetBody(response)
+		ctx.SetStatusCode(409)
+		ctx.SetContentType("application/json")
+		return
+	}
+	if posts == nil {
+		errMsg := models.ErrMsg{Message: fmt.Sprintf("Can't find thread or forum")}
+		response, _ := easyjson.Marshal(errMsg)
+		ctx.SetBody(response)
+		ctx.SetStatusCode(404)
+		ctx.SetContentType("application/json")
+		return
+	}
+
+	resp, _ := easyjson.Marshal(posts)
+	ctx.Response.SetBody(resp)
+	ctx.SetContentType("application/json")
+	ctx.Response.SetStatusCode(201)
+}
 
 func GetThreadDetails(ctx *fasthttp.RequestCtx) {
 	slugOrId := ctx.UserValue("slug_or_id").(string)
@@ -33,9 +86,26 @@ func GetThreadDetails(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetStatusCode(200)
 }
 
-//func EditThread(ctx *fasthttp.RequestCtx) {
-//
-//}
+func EditThread(ctx *fasthttp.RequestCtx) {
+	slugOrId := ctx.UserValue("slug_or_id").(string)
+	item := &models.ThreadUpdate{}
+	easyjson.Unmarshal(ctx.PostBody(), item)
+
+	thread := services.ThreadSrv.UpdateBySlugOrId(slugOrId, item)
+	if thread == nil {
+		errMsg := models.ErrMsg{Message: fmt.Sprintf("Can't find thread with slug or id:  %s", slugOrId)}
+		response, _ := easyjson.Marshal(errMsg)
+		ctx.SetBody(response)
+		ctx.SetStatusCode(404)
+		ctx.SetContentType("application/json")
+		return
+	}
+
+	resp, _ := easyjson.Marshal(thread)
+	ctx.Response.SetBody(resp)
+	ctx.SetContentType("application/json")
+	ctx.Response.SetStatusCode(200)
+}
 
 func GetThreadPosts(ctx *fasthttp.RequestCtx) {
 	slugOrId := ctx.UserValue("slug_or_id").(string)
@@ -74,6 +144,6 @@ func GetThreadPosts(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetStatusCode(200)
 }
 
-//func VoteForThread(ctx *fasthttp.RequestCtx) {
-//
-//}
+func VoteForThread(ctx *fasthttp.RequestCtx) {
+
+}

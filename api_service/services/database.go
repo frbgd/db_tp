@@ -30,6 +30,6 @@ func (databaseSrv *DatabaseService) GetStatus() *models.Status {
 	return status
 }
 
-//func (databaseSrv *DatabaseService) ClearDatabase() error {
-//
-//}
+func (databaseSrv *DatabaseService) ClearDatabase() {
+
+}

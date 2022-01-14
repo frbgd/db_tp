@@ -21,11 +21,11 @@ func NewUserService(db *db.PostgresDbEngine) *UserService {
 //func (userSrv *UserService) GetUsersByNicknameOrEmail(nickname string, email string) (*models.User[], error) {
 //
 //}
-//
-//func (userSrv *UserService) CreateUser(item *models.User) (*models.User, error) {
-//
-//}
-//
+
+func (userSrv *UserService) CreateUser(item *models.User) (models.Users, bool) {
+
+}
+
 //func (userSrv *UserService) GetByEmail(email string) (*models.User, error) {
 //
 //}
@@ -62,6 +62,6 @@ func (userSrv *UserService) GetByNickname(nickname string) *models.User {
 	}
 }
 
-//func (userSrv *UserService) UpdateByNickname(nickname string, item *models.UserUpdate) (*models.User, error) {
-//
-//}
+func (userSrv *UserService) UpdateByNickname(nickname string, item *models.UserUpdate) (*models.User, bool) {
+
+}
