@@ -2,8 +2,8 @@ package services
 
 import (
 	"context"
-	"db_tp/db"
 	"db_tp/models"
+	"db_tp/storage"
 	"github.com/jackc/pgx/v4"
 	"strings"
 )
@@ -11,10 +11,10 @@ import (
 var UserSrv *UserService
 
 type UserService struct {
-	db *db.PostgresDbEngine
+	db *storage.PostgresDbEngine
 }
 
-func NewUserService(db *db.PostgresDbEngine) *UserService {
+func NewUserService(db *storage.PostgresDbEngine) *UserService {
 	srv := new(UserService)
 	srv.db = db
 	return srv

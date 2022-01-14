@@ -3,18 +3,18 @@ package services
 import (
 	"context"
 	"database/sql"
-	"db_tp/db"
 	"db_tp/models"
+	"db_tp/storage"
 	"github.com/jackc/pgx/v4"
 )
 
 var PostSrv *PostService
 
 type PostService struct {
-	db *db.PostgresDbEngine
+	db *storage.PostgresDbEngine
 }
 
-func NewPostService(db *db.PostgresDbEngine) *PostService {
+func NewPostService(db *storage.PostgresDbEngine) *PostService {
 	srv := new(PostService)
 	srv.db = db
 	return srv

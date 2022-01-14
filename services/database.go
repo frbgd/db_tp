@@ -2,17 +2,17 @@ package services
 
 import (
 	"context"
-	"db_tp/db"
 	"db_tp/models"
+	"db_tp/storage"
 )
 
 var DatabaseSrv *DatabaseService
 
 type DatabaseService struct {
-	db *db.PostgresDbEngine
+	db *storage.PostgresDbEngine
 }
 
-func NewDatabaseService(db *db.PostgresDbEngine) *DatabaseService {
+func NewDatabaseService(db *storage.PostgresDbEngine) *DatabaseService {
 	srv := new(DatabaseService)
 	srv.db = db
 	return srv

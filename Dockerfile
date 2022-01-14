@@ -30,7 +30,7 @@ USER root
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
 WORKDIR /usr/src/app
-COPY api_service .
+COPY . .
 
 EXPOSE 5432
 EXPOSE 5000

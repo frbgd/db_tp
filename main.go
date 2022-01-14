@@ -2,8 +2,8 @@ package main
 
 import (
 	"db_tp/api"
-	"db_tp/db"
 	"db_tp/services"
+	"db_tp/storage"
 	"github.com/fasthttp/router"
 	"github.com/valyala/fasthttp"
 	"log"
@@ -13,7 +13,7 @@ import (
 var err error
 
 func main() {
-	db.PgEngine, err = db.NewPostgresDbEngine(
+	storage.PgEngine, err = storage.NewPostgresDbEngine(
 		os.Getenv("DBHOST"),
 		os.Getenv("DBPORT"),
 		os.Getenv("DBNAME"),
@@ -24,13 +24,13 @@ func main() {
 		log.Fatalln(err)
 		return
 	}
-	defer db.PgEngine.Close()
+	defer storage.PgEngine.Close()
 
-	services.DatabaseSrv = services.NewDatabaseService(db.PgEngine)
-	services.ForumSrv = services.NewForumService(db.PgEngine)
-	services.PostSrv = services.NewPostService(db.PgEngine)
-	services.ThreadSrv = services.NewThreadService(db.PgEngine)
-	services.UserSrv = services.NewUserService(db.PgEngine)
+	services.DatabaseSrv = services.NewDatabaseService(storage.PgEngine)
+	services.ForumSrv = services.NewForumService(storage.PgEngine)
+	services.PostSrv = services.NewPostService(storage.PgEngine)
+	services.ThreadSrv = services.NewThreadService(storage.PgEngine)
+	services.UserSrv = services.NewUserService(storage.PgEngine)
 
 	r := router.New()
 

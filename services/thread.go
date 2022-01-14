@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 	"database/sql"
-	"db_tp/db"
 	"db_tp/models"
+	"db_tp/storage"
 	"fmt"
 	"github.com/jackc/pgx/v4"
 	"strconv"
@@ -208,10 +208,10 @@ var sqlGetSortedPosts = map[bool]map[string]string{
 var ThreadSrv *ThreadService
 
 type ThreadService struct {
-	db *db.PostgresDbEngine
+	db *storage.PostgresDbEngine
 }
 
-func NewThreadService(db *db.PostgresDbEngine) *ThreadService {
+func NewThreadService(db *storage.PostgresDbEngine) *ThreadService {
 	srv := new(ThreadService)
 	srv.db = db
 	return srv

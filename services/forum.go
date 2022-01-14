@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 	"database/sql"
-	"db_tp/db"
 	"db_tp/models"
+	"db_tp/storage"
 	"fmt"
 	"github.com/jackc/pgx/v4"
 	"strings"
@@ -114,10 +114,10 @@ var sqlGetThreadsByForumSlug = map[bool]string{
 var ForumSrv *ForumService
 
 type ForumService struct {
-	db *db.PostgresDbEngine
+	db *storage.PostgresDbEngine
 }
 
-func NewForumService(db *db.PostgresDbEngine) *ForumService {
+func NewForumService(db *storage.PostgresDbEngine) *ForumService {
 	srv := new(ForumService)
 	srv.db = db
 	return srv
