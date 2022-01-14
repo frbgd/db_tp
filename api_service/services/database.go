@@ -31,5 +31,6 @@ func (databaseSrv *DatabaseService) GetStatus() *models.Status {
 }
 
 func (databaseSrv *DatabaseService) ClearDatabase() {
-
+	databaseSrv.db.CP.Query(context.Background(),
+		`TRUNCATE users, forums, threads, votes, posts, forums_users_nicknames`)
 }

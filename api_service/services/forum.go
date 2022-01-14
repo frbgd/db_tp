@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"db_tp/db"
 	"db_tp/models"
+	"fmt"
 	"github.com/jackc/pgx/v4"
+	"strings"
 	"time"
 )
 
@@ -145,10 +147,6 @@ WHERE slug = $1`,
 	}
 }
 
-//func (forumSrv *ForumService) GetThreadBySlug(slug string) (*models.Thread, error) {
-//
-//}
-
 func (forumSrv *ForumService) GetForumUsers(slug string, desc bool, limit int, since string) models.Users {
 	var rows pgx.Rows
 	if since != "" {
@@ -247,9 +245,50 @@ func (forumSrv *ForumService) GetForumThreads(slug string, desc bool, limit int,
 }
 
 func (forumSrv *ForumService) CreateForum(item *models.Forum) (*models.Forum, bool) {
-
+	row := forumSrv.db.CP.QueryRow(context.Background(),
+		`INSERT INTO forums (slug, title, threads, posts, owner_nickname)
+                    VALUES ($1, $2, $3, $4, (
+                                SELECT nickname FROM users WHERE nickname = $5
+                    )) RETURNING owner_nickname`,
+		item.Slug,
+		item.Title,
+		item.Threads,
+		item.Posts,
+		item.User,
+	)
+	err := row.Scan(&item.User)
+	if err != nil {
+		if strings.Contains(fmt.Sprint(err), "unique") {
+			return forumSrv.GetBySlug(item.Slug), true
+		}
+		if strings.Contains(fmt.Sprint(err), "not-null") {
+			return nil, false
+		}
+	}
+	return item, false
 }
 
 func (forumSrv *ForumService) CreateThread(item *models.Thread) (*models.Thread, bool) {
-
+	row := forumSrv.db.CP.QueryRow(context.Background(),
+		`INSERT INTO threads (slug, user_nickname, title, message, created, forum_slug)
+			VALUES ($1, (SELECT nickname FROM users WHERE nickname = $2), $3, $4, $5,
+					(SELECT slug FROM forums WHERE slug = $6))
+			RETURNING id, user_nickname, forum_slug, created`,
+		item.Slug,
+		item.Author,
+		item.Title,
+		item.Message,
+		item.Created,
+		item.Forum,
+	)
+	err := row.Scan(&item.Id, &item.Author, &item.Forum, &item.Created)
+	if err != nil {
+		if strings.Contains(fmt.Sprint(err), "unique") {
+			return ThreadSrv.GetBySlug(item.Slug), true
+		}
+		if strings.Contains(fmt.Sprint(err), "not-null") {
+			return nil, false
+		}
+	}
+	return item, false
 }

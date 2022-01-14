@@ -90,3 +90,9 @@ type UserUpdate struct {
 	Fullname string `json:"fullname,omitempty"`
 	About    string `json:"about,omitempty"`
 }
+
+//easyjson:json
+type Vote struct {
+	Nickname string `json:"nickname,omitempty"`
+	Voice    int    `json:"voice,omitempty"`
+}

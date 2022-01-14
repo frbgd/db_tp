@@ -5,8 +5,10 @@ import (
 	"database/sql"
 	"db_tp/db"
 	"db_tp/models"
+	"fmt"
 	"github.com/jackc/pgx/v4"
 	"strconv"
+	"strings"
 )
 
 var sqlGetSortedPostsSince = map[bool]map[string]string{
@@ -311,24 +313,162 @@ func (threadSrv *ThreadService) GetById(id int) *models.Thread {
 }
 
 func (threadSrv *ThreadService) CreatePosts(posts *models.Posts) (*models.Posts, bool) {
+	resultPosts := make(models.Posts, 0)
+	for _, post := range *posts {
+		var row pgx.Row
+		if post.Parent == 0 {
+			row = threadSrv.db.CP.QueryRow(
+				context.Background(),
+				`INSERT INTO posts (thread_id, user_nickname, forum_slug, message, parent, created)
+                VALUES ($1, $2, $3, $4, NULL, $5)
+                RETURNING id, thread_id, user_nickname, forum_slug, is_edited, message, parent, created`,
+				post.Thread,
+				post.Author,
+				post.Forum,
+				post.Message,
+				post.Created,
+			)
+		} else {
+			row = threadSrv.db.CP.QueryRow(
+				context.Background(),
+				`INSERT INTO posts (thread_id, user_nickname, forum_slug, message, parent, created)
+                VALUES ($1, $2, $3, $4, $5, $6)
+                RETURNING id, thread_id, user_nickname, forum_slug, is_edited, message, parent, created`,
+				post.Thread,
+				post.Author,
+				post.Forum,
+				post.Message,
+				post.Parent,
+				post.Created,
+			)
+		}
 
+		newPost := &models.Post{}
+		parent := sql.NullInt64{}
+		err := row.Scan(
+			&newPost.Id,
+			&newPost.Thread,
+			&newPost.Author,
+			&newPost.Forum,
+			&newPost.IsEdited,
+			&newPost.Message,
+			&parent,
+			&newPost.Created,
+		)
+		if err != nil {
+			if strings.Contains(fmt.Sprint(err), "not-null") || strings.Contains(fmt.Sprint(err), "foreign key") {
+				return nil, false
+			}
+			if strings.Contains(fmt.Sprint(err), "not exists") {
+				return nil, true
+			}
+		}
+		if parent.Valid {
+			post.Parent = int(parent.Int64)
+		}
+		resultPosts = append(resultPosts, *newPost)
+	}
+	return &resultPosts, false
 }
 
 func (threadSrv *ThreadService) UpdateBySlugOrId(slugOrId string, item *models.ThreadUpdate) *models.Thread {
-
+	thread := &models.Thread{}
+	if id, err := strconv.Atoi(slugOrId); err == nil {
+		thread = threadSrv.UpdateById(id, item)
+	}
+	if thread != nil {
+		return thread
+	}
+	return threadSrv.UpdateBySlug(slugOrId, item)
 }
 
-//func (threadSrv *ThreadService) UpdateBySlug(slug string, item *models.ThreadUpdate) (*models.Thread, error) {
-//
-//}
-//
-//func (threadSrv *ThreadService) UpdateById(id int64, item *models.ThreadUpdate) (*models.Thread, error) {
-//
-//}
+func (threadSrv *ThreadService) UpdateBySlug(slug string, item *models.ThreadUpdate) *models.Thread {
+	threadTitle := new(string)
+	if item.Title != "" {
+		threadTitle = &item.Title
+	}
+	threadMessage := new(string)
+	if item.Message != "" {
+		threadMessage = &item.Message
+	}
 
-//func (threadSrv *ThreadService) VoteById(id int64, item *models.Vote) error {
-//
-//}
+	thread := &models.Thread{}
+	row := threadSrv.db.CP.QueryRow(context.Background(),
+		`UPDATE threads
+			SET title   = COALESCE(NULLIF($2, ''), title),
+				message = COALESCE(NULLIF($3, ''), message)
+			WHERE id = $1
+			RETURNING id, slug, forum_slug, user_nickname, title, message, votes, created`,
+		slug, threadTitle, threadMessage)
+	slugFromDb := sql.NullString{}
+	err = row.Scan(
+		&thread.Id,
+		&slugFromDb,
+		&thread.Forum,
+		&thread.Author,
+		&thread.Title,
+		&thread.Message,
+		&thread.Votes,
+		&thread.Created,
+	)
+	if err == pgx.ErrNoRows {
+		return nil
+	}
+	if slugFromDb.Valid {
+		thread.Slug = slugFromDb.String
+	}
+	return thread
+}
+
+func (threadSrv *ThreadService) UpdateById(id int, item *models.ThreadUpdate) *models.Thread {
+	threadTitle := new(string)
+	if item.Title != "" {
+		threadTitle = &item.Title
+	}
+	threadMessage := new(string)
+	if item.Message != "" {
+		threadMessage = &item.Message
+	}
+
+	thread := &models.Thread{}
+	row := threadSrv.db.CP.QueryRow(context.Background(),
+		`UPDATE threads
+			SET title   = COALESCE(NULLIF($2, ''), title),
+				message = COALESCE(NULLIF($3, ''), message)
+			WHERE id = $1
+			RETURNING id, slug, forum_slug, user_nickname, title, message, votes, created`,
+		id, threadTitle, threadMessage)
+	slugFromDb := sql.NullString{}
+	err = row.Scan(
+		&thread.Id,
+		&slugFromDb,
+		&thread.Forum,
+		&thread.Author,
+		&thread.Title,
+		&thread.Message,
+		&thread.Votes,
+		&thread.Created,
+	)
+	if err == pgx.ErrNoRows {
+		return nil
+	}
+	if slugFromDb.Valid {
+		thread.Slug = slugFromDb.String
+	}
+	return thread
+}
+
+func (threadSrv *ThreadService) VoteById(id int, item *models.Vote) error {
+	_, err := threadSrv.db.CP.Exec(context.Background(),
+		`INSERT INTO votes (thread_id, user_nickname, voice)
+			VALUES ($1, $2, $3)
+			ON CONFLICT (thread_id, user_nickname) DO UPDATE SET voice = $3`,
+		id,
+		item.Nickname,
+		item.Voice,
+	)
+	return err
+}
 
 func (threadSrv *ThreadService) GetPosts(threadId int, desc bool, limit int, since int, sort string) models.Posts {
 	var rows pgx.Rows
