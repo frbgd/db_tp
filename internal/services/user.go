@@ -2,8 +2,8 @@ package services
 
 import (
 	"context"
-	"db_tp/models"
-	"db_tp/storage"
+	"db_tp/internal/models"
+	"db_tp/internal/storage"
 	"github.com/jackc/pgx/v4"
 	"strings"
 )

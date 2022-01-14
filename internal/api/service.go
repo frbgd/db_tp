@@ -1,7 +1,7 @@
 package api
 
 import (
-	"db_tp/services"
+	"db_tp/internal/services"
 	"github.com/mailru/easyjson"
 	"github.com/valyala/fasthttp"
 )

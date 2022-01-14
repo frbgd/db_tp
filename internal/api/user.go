@@ -1,8 +1,8 @@
 package api
 
 import (
-	"db_tp/models"
-	"db_tp/services"
+	"db_tp/internal/models"
+	"db_tp/internal/services"
 	"fmt"
 	"github.com/mailru/easyjson"
 	"github.com/valyala/fasthttp"
