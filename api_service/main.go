@@ -1,4 +1,4 @@
-package api_service
+package main
 
 import (
 	"db_tp/api"
@@ -14,9 +14,11 @@ var err error
 
 func main() {
 	db.PgEngine, err = db.NewPostgresDbEngine(
+		os.Getenv("DBHOST"),
+		os.Getenv("DBPORT"),
 		os.Getenv("DBNAME"),
 		os.Getenv("DBUSER"),
-		os.Getenv("PGPASSWORD"),
+		os.Getenv("DBPASS"),
 	)
 	if err != nil {
 		log.Fatalln(err)

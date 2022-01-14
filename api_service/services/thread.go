@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"db_tp/db"
 	"db_tp/models"
 	"github.com/jackc/pgx/v4"
@@ -226,7 +227,7 @@ func (threadSrv *ThreadService) GetBySlugOrId(slugOrId string) *models.Thread {
 }
 
 func (threadSrv *ThreadService) GetBySlug(slug string) *models.Thread {
-	rows, _ := threadSrv.db.CP.Query(
+	rows, err := threadSrv.db.CP.Query(
 		context.Background(),
 		`SELECT id,
 				   slug,
@@ -239,11 +240,14 @@ func (threadSrv *ThreadService) GetBySlug(slug string) *models.Thread {
 			FROM threads
 			WHERE slug = $1`,
 		slug)
+	if err != nil {
+		panic(err)
+	}
 	defer rows.Close()
 
 	if rows.Next() {
 		thread := new(models.Thread)
-		rows.Scan(
+		err = rows.Scan(
 			&thread.Id,
 			&thread.Slug,
 			&thread.Forum,
@@ -253,6 +257,9 @@ func (threadSrv *ThreadService) GetBySlug(slug string) *models.Thread {
 			&thread.Votes,
 			&thread.Created,
 		)
+		if err != nil {
+			panic(err)
+		}
 		return thread
 	} else {
 		return nil
@@ -260,7 +267,7 @@ func (threadSrv *ThreadService) GetBySlug(slug string) *models.Thread {
 }
 
 func (threadSrv *ThreadService) GetById(id int) *models.Thread {
-	rows, _ := threadSrv.db.CP.Query(
+	rows, err := threadSrv.db.CP.Query(
 		context.Background(),
 		`SELECT id,
 				   slug,
@@ -273,13 +280,17 @@ func (threadSrv *ThreadService) GetById(id int) *models.Thread {
 			FROM threads
 			WHERE id = $1`,
 		id)
+	if err != nil {
+		panic(err)
+	}
 	defer rows.Close()
 
 	if rows.Next() {
 		thread := new(models.Thread)
-		rows.Scan(
+		slug := sql.NullString{}
+		err = rows.Scan(
 			&thread.Id,
-			&thread.Slug,
+			&slug,
 			&thread.Forum,
 			&thread.Author,
 			&thread.Title,
@@ -287,6 +298,12 @@ func (threadSrv *ThreadService) GetById(id int) *models.Thread {
 			&thread.Votes,
 			&thread.Created,
 		)
+		if err != nil {
+			panic(err)
+		}
+		if slug.Valid {
+			thread.Slug = slug.String
+		}
 		return thread
 	} else {
 		return nil
@@ -313,37 +330,54 @@ func (threadSrv *ThreadService) GetById(id int) *models.Thread {
 //
 //}
 
-func (threadSrv *ThreadService) GetPosts(threadId int, desc bool, limit int, since *int, sort string) []models.Post {
+func (threadSrv *ThreadService) GetPosts(threadId int, desc bool, limit int, since int, sort string) models.Posts {
 	var rows pgx.Rows
-	if since != nil {
-		rows, _ = threadSrv.db.CP.Query(context.Background(),
+	if sort == "" {
+		sort = "flat"
+	}
+
+	if since != 0 {
+		rows, err = threadSrv.db.CP.Query(context.Background(),
 			sqlGetSortedPostsSince[desc][sort],
 			threadId,
-			&since,
+			since,
 			limit,
 		)
+		if err != nil {
+			panic(err)
+		}
 	} else {
-		rows, _ = threadSrv.db.CP.Query(context.Background(),
+		rows, err = threadSrv.db.CP.Query(context.Background(),
 			sqlGetSortedPosts[desc][sort],
 			threadId,
 			limit,
 		)
+		if err != nil {
+			panic(err)
+		}
 	}
 	defer rows.Close()
 
 	posts := make([]models.Post, 0)
 	for rows.Next() {
 		var post models.Post
-		rows.Scan(
+		parent := sql.NullInt64{}
+		err = rows.Scan(
 			&post.Id,
 			&post.Thread,
 			&post.Author,
 			&post.Forum,
 			&post.IsEdited,
 			&post.Message,
-			&post.Parent,
+			&parent,
 			&post.Created,
 		)
+		if err != nil {
+			panic(err)
+		}
+		if parent.Valid {
+			post.Parent = int(parent.Int64)
+		}
 		posts = append(posts, post)
 	}
 	return posts

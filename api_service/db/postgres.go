@@ -13,9 +13,11 @@ type PostgresDbEngine struct {
 	CP      *pgxpool.Pool
 }
 
-func NewPostgresDbEngine(user string, password string, database string) (*PostgresDbEngine, error) {
+func NewPostgresDbEngine(host string, port string, database string, user string, password string) (*PostgresDbEngine, error) {
 	p := new(PostgresDbEngine)
-	p.connStr = fmt.Sprintf("host=/var/run/postgresql dbname=%s user=%s password=%s sslmode=disable pool_max_conns=5000",
+	p.connStr = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable pool_max_conns=30",
+		host,
+		port,
 		database,
 		user,
 		password,

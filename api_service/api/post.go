@@ -25,7 +25,7 @@ func GetPostDetails(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	response := new(models.FullPost)
+	var response models.FullPost
 	response.Post = post.Post
 	if strings.Contains(related, "user") {
 		response.Author = post.Author

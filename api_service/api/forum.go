@@ -41,7 +41,13 @@ func GetForumDetails(ctx *fasthttp.RequestCtx) {
 func GetForumUsers(ctx *fasthttp.RequestCtx) {
 	slug := ctx.UserValue("slug").(string)
 	desc, _ := strconv.ParseBool(string(ctx.QueryArgs().Peek("desc")))
-	limit, _ := strconv.Atoi(string(ctx.QueryArgs().Peek("limit")))
+	limitStr := string(ctx.QueryArgs().Peek("limit"))
+	var limit int
+	if limitStr == "" {
+		limit = 100
+	} else {
+		limit, _ = strconv.Atoi(limitStr)
+	}
 	since := string(ctx.QueryArgs().Peek("since"))
 
 	users := services.ForumSrv.GetForumUsers(slug, desc, limit, since)
@@ -64,9 +70,15 @@ func GetForumUsers(ctx *fasthttp.RequestCtx) {
 func GetForumThreads(ctx *fasthttp.RequestCtx) {
 	slug := ctx.UserValue("slug").(string)
 	desc, _ := strconv.ParseBool(string(ctx.QueryArgs().Peek("desc")))
-	limit, _ := strconv.Atoi(string(ctx.QueryArgs().Peek("limit")))
+	limitStr := string(ctx.QueryArgs().Peek("limit"))
+	var limit int
+	if limitStr == "" {
+		limit = 100
+	} else {
+		limit, _ = strconv.Atoi(limitStr)
+	}
 
-	var threads []models.Thread
+	var threads models.Threads
 
 	since := string(ctx.QueryArgs().Peek("since"))
 	if since != "" {

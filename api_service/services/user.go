@@ -31,7 +31,7 @@ func NewUserService(db *db.PostgresDbEngine) *UserService {
 //}
 
 func (userSrv *UserService) GetByNickname(nickname string) *models.User {
-	rows, _ := userSrv.db.CP.Query(
+	rows, err := userSrv.db.CP.Query(
 		context.Background(),
 		`SELECT 	nickname,
                         email,
@@ -40,16 +40,22 @@ func (userSrv *UserService) GetByNickname(nickname string) *models.User {
                 FROM users
                 WHERE nickname = $1`,
 		nickname)
+	if err != nil {
+		panic(err)
+	}
 	defer rows.Close()
 
 	if rows.Next() {
 		user := new(models.User)
-		rows.Scan(
+		err = rows.Scan(
 			&user.Nickname,
 			&user.Email,
 			&user.Fullname,
 			&user.About,
 		)
+		if err != nil {
+			panic(err)
+		}
 		return user
 	} else {
 		return nil

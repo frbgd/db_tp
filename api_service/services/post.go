@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"db_tp/db"
 	"db_tp/models"
 )
@@ -19,7 +20,7 @@ func NewPostService(db *db.PostgresDbEngine) *PostService {
 }
 
 func (postSrv *PostService) GetById(id int) *models.FullPost {
-	rows, _ := postSrv.db.CP.Query(
+	rows, err := postSrv.db.CP.Query(
 		context.Background(),
 		`SELECT id,
 				   thread_id,
@@ -32,6 +33,9 @@ func (postSrv *PostService) GetById(id int) *models.FullPost {
 			FROM posts
 			WHERE id = $1`,
 		id)
+	if err != nil {
+		panic(err)
+	}
 	defer rows.Close()
 
 	if !rows.Next() {
@@ -40,19 +44,27 @@ func (postSrv *PostService) GetById(id int) *models.FullPost {
 		fullPost := new(models.FullPost)
 
 		var postObj models.Post
-		rows.Scan(&postObj.Thread,
+		parent := sql.NullInt64{}
+		err = rows.Scan(&postObj.Id,
+			&postObj.Thread,
 			&postObj.Author,
 			&postObj.Forum,
 			&postObj.IsEdited,
 			&postObj.Message,
-			&postObj.Parent,
+			&parent,
 			&postObj.Created,
 		)
+		if parent.Valid {
+			postObj.Parent = int(parent.Int64)
+		}
+		if err != nil {
+			panic(err)
+		}
 
-		fullPost.Post = postObj
-		fullPost.Author = *UserSrv.GetByNickname(postObj.Author)
-		fullPost.Forum = *ForumSrv.GetBySlug(postObj.Forum)
-		fullPost.Thread = *ThreadSrv.GetById(postObj.Thread)
+		fullPost.Post = &postObj
+		fullPost.Author = UserSrv.GetByNickname(postObj.Author)
+		fullPost.Forum = ForumSrv.GetBySlug(postObj.Forum)
+		fullPost.Thread = ThreadSrv.GetById(postObj.Thread)
 
 		return fullPost
 	}

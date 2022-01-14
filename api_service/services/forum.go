@@ -2,11 +2,14 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"db_tp/db"
 	"db_tp/models"
 	"github.com/jackc/pgx/v4"
 	"time"
 )
+
+var err error
 
 var sqlGetForumUserWithSince = map[bool]string{
 	true: `SELECT nickname,
@@ -119,17 +122,23 @@ func NewForumService(db *db.PostgresDbEngine) *ForumService {
 }
 
 func (forumSrv *ForumService) GetBySlug(slug string) *models.Forum {
-	rows, _ := forumSrv.db.CP.Query(
+	rows, err := forumSrv.db.CP.Query(
 		context.Background(),
 		`SELECT slug, title, threads, posts, owner_nickname 
 FROM forums 
 WHERE slug = $1`,
 		slug)
+	if err != nil {
+		panic(err)
+	}
 	defer rows.Close()
 
 	if rows.Next() {
 		forum := new(models.Forum)
-		rows.Scan(&forum.Slug, &forum.Title, &forum.Threads, &forum.Posts, &forum.User)
+		err = rows.Scan(&forum.Slug, &forum.Title, &forum.Threads, &forum.Posts, &forum.User)
+		if err != nil {
+			panic(err)
+		}
 		return forum
 	} else {
 		return nil
@@ -140,7 +149,7 @@ WHERE slug = $1`,
 //
 //}
 
-func (forumSrv *ForumService) GetForumUsers(slug string, desc bool, limit int, since string) []models.User {
+func (forumSrv *ForumService) GetForumUsers(slug string, desc bool, limit int, since string) models.Users {
 	var rows pgx.Rows
 	if since != "" {
 		rows, _ = forumSrv.db.CP.Query(context.Background(),
@@ -177,21 +186,30 @@ func (forumSrv *ForumService) GetForumUsers(slug string, desc bool, limit int, s
 	return users
 }
 
-func (forumSrv *ForumService) GetForumThreads(slug string, desc bool, limit int, since *time.Time) []models.Thread {
+func (forumSrv *ForumService) GetForumThreads(slug string, desc bool, limit int, since *time.Time) models.Threads {
 	var rows pgx.Rows
+
 	if since != nil {
-		rows, _ = forumSrv.db.CP.Query(context.Background(),
-			sqlGetThreadsByForumSlugSince[desc],
+		sql := sqlGetThreadsByForumSlugSince[desc]
+		rows, err = forumSrv.db.CP.Query(context.Background(),
+			sql,
 			slug,
 			since,
 			limit,
 		)
+		if err != nil {
+			panic(err)
+		}
 	} else {
-		rows, _ = forumSrv.db.CP.Query(context.Background(),
-			sqlGetThreadsByForumSlug[desc],
+		sql := sqlGetThreadsByForumSlug[desc]
+		rows, err = forumSrv.db.CP.Query(context.Background(),
+			sql,
 			slug,
 			limit,
 		)
+		if err != nil {
+			panic(err)
+		}
 	}
 	defer rows.Close()
 
@@ -200,14 +218,21 @@ func (forumSrv *ForumService) GetForumThreads(slug string, desc bool, limit int,
 	for rows.Next() {
 		foundThreads = true
 		var thread models.Thread
-		rows.Scan(&thread.Id,
-			&thread.Slug,
+		slug := sql.NullString{}
+		err = rows.Scan(&thread.Id,
+			&slug,
 			&thread.Forum,
 			&thread.Author,
 			&thread.Title,
 			&thread.Message,
 			&thread.Votes,
 			&thread.Created)
+		if err != nil {
+			panic(err)
+		}
+		if slug.Valid {
+			thread.Slug = slug.String
+		}
 		threads = append(threads, thread)
 	}
 

@@ -39,7 +39,13 @@ func GetThreadDetails(ctx *fasthttp.RequestCtx) {
 
 func GetThreadPosts(ctx *fasthttp.RequestCtx) {
 	slugOrId := ctx.UserValue("slug_or_id").(string)
-	limit, _ := strconv.Atoi(string(ctx.QueryArgs().Peek("limit")))
+	limitStr := string(ctx.QueryArgs().Peek("limit"))
+	var limit int
+	if limitStr == "" {
+		limit = 100
+	} else {
+		limit, _ = strconv.Atoi(limitStr)
+	}
 	since, _ := strconv.Atoi(string(ctx.QueryArgs().Peek("since")))
 	desc, _ := strconv.ParseBool(string(ctx.QueryArgs().Peek("desc")))
 	sort := string(ctx.QueryArgs().Peek("sort"))
@@ -61,7 +67,7 @@ func GetThreadPosts(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	posts := services.ThreadSrv.GetPosts(thread.Id, desc, limit, &since, sort)
+	posts := services.ThreadSrv.GetPosts(thread.Id, desc, limit, since, sort)
 	resp, _ := easyjson.Marshal(posts)
 	ctx.Response.SetBody(resp)
 	ctx.SetContentType("application/json")
