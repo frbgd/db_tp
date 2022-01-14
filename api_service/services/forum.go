@@ -269,18 +269,34 @@ func (forumSrv *ForumService) CreateForum(item *models.Forum) (*models.Forum, bo
 }
 
 func (forumSrv *ForumService) CreateThread(item *models.Thread) (*models.Thread, bool) {
-	row := forumSrv.db.CP.QueryRow(context.Background(),
-		`INSERT INTO threads (slug, user_nickname, title, message, created, forum_slug)
+	var row pgx.Row
+	if item.Slug == "" {
+		row = forumSrv.db.CP.QueryRow(context.Background(),
+			`INSERT INTO threads (user_nickname, title, message, created, forum_slug)
+			VALUES ((SELECT nickname FROM users WHERE nickname = $1), $2, $3, $4,
+					(SELECT slug FROM forums WHERE slug = $5))
+			RETURNING id, user_nickname, forum_slug, created`,
+			item.Author,
+			item.Title,
+			item.Message,
+			item.Created,
+			item.Forum,
+		)
+	} else {
+		row = forumSrv.db.CP.QueryRow(context.Background(),
+			`INSERT INTO threads (slug, user_nickname, title, message, created, forum_slug)
 			VALUES ($1, (SELECT nickname FROM users WHERE nickname = $2), $3, $4, $5,
 					(SELECT slug FROM forums WHERE slug = $6))
 			RETURNING id, user_nickname, forum_slug, created`,
-		item.Slug,
-		item.Author,
-		item.Title,
-		item.Message,
-		item.Created,
-		item.Forum,
-	)
+			item.Slug,
+			item.Author,
+			item.Title,
+			item.Message,
+			item.Created,
+			item.Forum,
+		)
+	}
+
 	err := row.Scan(&item.Id, &item.Author, &item.Forum, &item.Created)
 	if err != nil {
 		if strings.Contains(fmt.Sprint(err), "unique") {

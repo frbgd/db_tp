@@ -72,7 +72,7 @@ func (postSrv *PostService) GetById(id int) *models.FullPost {
 }
 
 func (postSrv *PostService) UpdateById(id int, item *models.PostUpdate) *models.Post {
-	postMessage := new(string)
+	var postMessage *string = nil
 	if item.Message != "" {
 		postMessage = &item.Message
 	}
@@ -90,7 +90,7 @@ func (postSrv *PostService) UpdateById(id int, item *models.PostUpdate) *models.
 			RETURNING id, thread_id, user_nickname, forum_slug, is_edited, message, parent, created`,
 		id, postMessage)
 	parent := sql.NullInt64{}
-	err = row.Scan(
+	err := row.Scan(
 		&post.Id,
 		&post.Thread,
 		&post.Author,

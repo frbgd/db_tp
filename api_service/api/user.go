@@ -20,6 +20,7 @@ func CreateUser(ctx *fasthttp.RequestCtx) {
 		ctx.Response.SetBody(resp)
 		ctx.SetContentType("application/json")
 		ctx.Response.SetStatusCode(409)
+		return
 	}
 
 	resp, _ := easyjson.Marshal(users[0])

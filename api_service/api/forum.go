@@ -24,8 +24,7 @@ func CreateForum(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	if notUnique {
-		errMsg := models.ErrMsg{Message: fmt.Sprintf("Not unique fields")}
-		response, _ := easyjson.Marshal(errMsg)
+		response, _ := easyjson.Marshal(forum)
 		ctx.SetBody(response)
 		ctx.SetStatusCode(409)
 		ctx.SetContentType("application/json")
@@ -76,8 +75,7 @@ func CreateThread(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	if notUnique {
-		errMsg := models.ErrMsg{Message: fmt.Sprintf("Not unique fields")}
-		response, _ := easyjson.Marshal(errMsg)
+		response, _ := easyjson.Marshal(thread)
 		ctx.SetBody(response)
 		ctx.SetStatusCode(409)
 		ctx.SetContentType("application/json")

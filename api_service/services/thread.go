@@ -364,7 +364,7 @@ func (threadSrv *ThreadService) CreatePosts(posts *models.Posts) (*models.Posts,
 			}
 		}
 		if parent.Valid {
-			post.Parent = int(parent.Int64)
+			newPost.Parent = int(parent.Int64)
 		}
 		resultPosts = append(resultPosts, *newPost)
 	}
@@ -372,7 +372,7 @@ func (threadSrv *ThreadService) CreatePosts(posts *models.Posts) (*models.Posts,
 }
 
 func (threadSrv *ThreadService) UpdateBySlugOrId(slugOrId string, item *models.ThreadUpdate) *models.Thread {
-	thread := &models.Thread{}
+	var thread *models.Thread = nil
 	if id, err := strconv.Atoi(slugOrId); err == nil {
 		thread = threadSrv.UpdateById(id, item)
 	}
@@ -397,11 +397,11 @@ func (threadSrv *ThreadService) UpdateBySlug(slug string, item *models.ThreadUpd
 		`UPDATE threads
 			SET title   = COALESCE(NULLIF($2, ''), title),
 				message = COALESCE(NULLIF($3, ''), message)
-			WHERE id = $1
+			WHERE slug = $1
 			RETURNING id, slug, forum_slug, user_nickname, title, message, votes, created`,
 		slug, threadTitle, threadMessage)
 	slugFromDb := sql.NullString{}
-	err = row.Scan(
+	err := row.Scan(
 		&thread.Id,
 		&slugFromDb,
 		&thread.Forum,

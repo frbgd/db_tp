@@ -32,7 +32,7 @@ func CreatePost(ctx *fasthttp.RequestCtx) {
 		resp, _ := easyjson.Marshal(items)
 		ctx.Response.SetBody(resp)
 		ctx.SetContentType("application/json")
-		ctx.Response.SetStatusCode(200)
+		ctx.Response.SetStatusCode(201)
 		return
 	}
 
@@ -165,6 +165,7 @@ func VoteForThread(ctx *fasthttp.RequestCtx) {
 			ctx.Response.SetBody(resp)
 			ctx.SetContentType("application/json")
 			ctx.Response.SetStatusCode(200)
+			return
 		}
 	}
 

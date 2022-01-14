@@ -1,11 +1,17 @@
-FROM ubuntu:18.04
+# Step 1. build_step
+FROM golang:1.14-stretch AS build_step
+WORKDIR /app
+
+COPY go.mod .
+RUN go mod download
+
+COPY . .
+RUN go build -o app api_service/main.go
+
+# Step 2. release_step
+FROM ubuntu:18.04 AS release_step
 
 ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update && apt-get install -y software-properties-common gcc vim && \
-    add-apt-repository -y ppa:deadsnakes/ppa
-RUN apt-get update && apt-get install -y python3.9 python3.9-dev python3-distutils python3-pip python3-apt build-essential
-
 ENV PGVER 12
 
 RUN apt -y update && \
@@ -18,7 +24,7 @@ RUN apt -y update && apt install -y \
         postgresql-$PGVER \
     && rm -rf /var/lib/apt/lists/*
 
-COPY ./db /db
+COPY --from=build_step /app/db/init.sql /db/init.sql
 
 USER postgres
 RUN service postgresql start && \
@@ -32,15 +38,11 @@ RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PGVER/main/pg_hba
 USER root
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
-COPY ./api_service/requirements.txt /app/requirements.txt
-
-RUN python3 -m pip install --upgrade pip && pip3 install --upgrade setuptools && pip3 install -r /app/requirements.txt
-
-COPY ./api_service /app
+COPY --from=build_step /app/api_service /app/
 
 WORKDIR /app
 
 EXPOSE 5432
 EXPOSE 5000
 
-CMD service postgresql start && gunicorn main:app --workers $(($(nproc) + 1)) --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:5000
+CMD service postgresql start && ./app
