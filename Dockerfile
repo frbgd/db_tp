@@ -1,15 +1,4 @@
-# Step 1. build_step
-FROM golang:1.14-stretch AS build_step
-WORKDIR /app
-
-COPY go.mod .
-RUN go mod download
-
-COPY . .
-RUN go build -o app api_service/main.go
-
-# Step 2. release_step
-FROM ubuntu:18.04 AS release_step
+FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PGVER 12
@@ -22,9 +11,11 @@ RUN apt -y update && \
 
 RUN apt -y update && apt install -y \
         postgresql-$PGVER \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
 
-COPY --from=build_step /app/db/init.sql /db/init.sql
+RUN cd /tmp && wget https://golang.org/dl/go1.17.5.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.17.5.linux-amd64.tar.gz
+
+COPY ./db /db
 
 USER postgres
 RUN service postgresql start && \
@@ -38,11 +29,16 @@ RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PGVER/main/pg_hba
 USER root
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
-COPY --from=build_step /app/api_service /app/
-
-WORKDIR /app
+WORKDIR /usr/src/app
+COPY api_service .
 
 EXPOSE 5432
 EXPOSE 5000
+
+ENV DBHOST 127.0.0.1
+ENV DBPORT 5432
+ENV DBNAME postgres
+ENV DBUSER postgres
+ENV PGPASSWORD mysecretpassword
 
 CMD service postgresql start && ./app
