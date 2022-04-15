@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:13-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+      - TZ='Europe/Moscow'
+    volumes:
+      - ./bazka.sql:/root/bazka.sql:ro
+      # - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: on-failure
+
+  bazki:
+    build:
+      context: .
+    ports:
+      - "5050:5000"
+    restart: on-failure
+    depends_on:
+      - postgres
